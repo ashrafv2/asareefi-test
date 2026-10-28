@@ -109,6 +109,72 @@ button.tx-detail-trigger .value{font-size:14px;font-weight:850;white-space:nowra
 .tx-edit-actions .btn{min-height:45px}
 .tx-edit-actions #editTxDelete{grid-column:1/-1;background:#fff1f0!important;color:#a52c27!important;border:1px solid #e9b2ae!important}
 @media(max-width:370px){button.tx-detail-trigger .tx-primary{gap:6px}button.tx-detail-trigger .rowmain b{font-size:13px}button.tx-detail-trigger .value{font-size:13px}.tx-edit-actions{grid-template-columns:1fr}}
+</style><style id="entry-screen-v13">
+/* Dedicated transaction-entry screen: avoid iPhone keyboard overlap and legacy floating entry bar. */
+#quickEntry.entrybar{display:none!important}
+body.entry-v13-open{overflow:hidden}
+.entry-v13:not([open]){display:none!important}
+.entry-v13[open]{
+ display:flex!important;position:fixed;inset:0;margin:auto;padding:0;box-sizing:border-box;
+ border:0;border-radius:0;width:100%;max-width:650px;height:100%;height:100dvh;max-height:none;
+ background:#f3f5f3;color:#243228;overflow:hidden;box-shadow:0 0 50px rgba(0,0,0,.22);
+}
+.entry-v13::backdrop{background:rgba(7,24,15,.65)}
+.entry-v13-frame{height:100%;width:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.entry-v13-head{
+ display:grid;grid-template-columns:90px minmax(0,1fr) 90px;align-items:center;
+ padding:calc(9px + env(safe-area-inset-top)) 12px 12px;
+ min-height:74px;background:linear-gradient(140deg,color-mix(in srgb,var(--green) 26%,#06432f),#075e45);
+ color:#fff;flex:0 0 auto;gap:6px
+}
+.entry-v13-head h2{margin:0;font-size:20px;text-align:center;font-weight:850;white-space:nowrap}
+.entry-v13-back{color:#fff;background:transparent;border:0;display:flex;align-items:center;gap:3px;font-size:14px;font-weight:750;min-height:44px;padding:0 2px}
+.entry-v13-back svg{flex:0 0 auto}
+.entry-v13-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:15px 15px 20px;scroll-padding-bottom:115px}
+.entry-v13-type{display:grid;grid-template-columns:1fr 1fr;background:#e6efe8;padding:4px;border-radius:15px;gap:4px;margin:0 0 14px}
+.entry-v13-type button{border:0;background:transparent;color:#6a7e71;font-size:15px;font-weight:800;min-height:42px;border-radius:11px}
+.entry-v13-type button.is-active{background:#087e5b;color:#fff;box-shadow:0 2px 8px #063a211b}
+.entry-v13-card{border-radius:19px;background:#fff;border:1px solid #e0e9e2;box-shadow:0 4px 20px #123b190a;padding:15px 14px 0}
+.entry-v13-amount-label{font-size:13px;color:#75877b;font-weight:750;text-align:center}
+.entry-v13-amount-wrap{display:flex;align-items:center;justify-content:center;gap:9px;min-height:73px;padding:5px 0 0;direction:ltr}
+#entryAmountV13{display:block;direction:ltr;line-height:1.15;font-size:clamp(38px,10vw,50px);font-weight:900;letter-spacing:-1px;color:#07583e;font-variant-numeric:tabular-nums;text-align:center;overflow-wrap:anywhere}
+.entry-v13-amount-wrap span{color:#6d8275;font-size:15px;font-weight:800;flex:0 0 auto}
+.entry-v13-expression{min-height:19px;text-align:center;color:#778a7c;font-size:12px;direction:ltr;margin-bottom:10px}
+.entry-v13-fields{border-top:1px solid #e5ebe5}
+.entry-v13-field{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-bottom:1px solid #e5ebe5;min-height:64px;text-align:right;padding:10px 0;color:#263b2c}
+.entry-v13-field:last-child{border-bottom:0}
+.entry-v13-field-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 38px;background:#e9f4ed;color:#167452}
+.entry-v13-field-text{flex:1;display:grid;gap:3px;min-width:0}
+.entry-v13-field-text small{font-size:11px;color:#77877b}
+.entry-v13-field-text strong{font-size:15px;color:#253a2d;overflow-wrap:anywhere}
+.entry-v13-chevron{font-size:24px;color:#70867a}
+.entry-v13-field-text input{display:block;width:100%;min-width:0;min-height:26px;border:0!important;background:transparent!important;outline:0!important;font-size:16px!important;color:#253a2d!important;padding:0!important;border-radius:0!important;text-align:right}
+.entry-v13-field-text input::placeholder{color:#9eaaa0}
+.entry-v13-field-text input:focus{box-shadow:none!important}
+.entry-v13-hint{color:#75847a;font-size:11px;line-height:1.7;margin:11px 4px}
+.entry-v13-save{display:block;width:100%;border:0;border-radius:14px;background:#087e5b;color:#fff;font-size:17px;font-weight:850;min-height:48px;padding:11px 15px}
+.entry-v13-pad{
+ background:#e8ece9;border-top:1px solid #d9e2db;padding:9px 10px calc(10px + env(safe-area-inset-bottom));
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;flex:0 0 auto;
+}
+.entry-v13-pad button{border:1px solid #d5ded7;border-radius:10px;background:#fff;box-shadow:0 1px 2px #153f1810;color:#25372a;font-size:23px;font-weight:720;min-height:clamp(38px,5.9dvh,51px);padding:0;line-height:1.2;touch-action:manipulation}
+.entry-v13-pad button:active{background:#d2eadb}
+.entry-v13-pad .entry-v13-op{background:#f7faf7;color:#275e45}
+.entry-v13-pad .entry-v13-equal,.entry-v13-pad .entry-v13-pad-save{background:#087e5b;color:#fff;border-color:#087e5b}
+.entry-v13-pad .entry-v13-equal:active,.entry-v13-pad .entry-v13-pad-save:active{background:#076447}
+.entry-v13.note-focused .entry-v13-pad{display:none}
+.entry-v13.note-focused .entry-v13-scroll{padding-bottom:calc(65px + env(safe-area-inset-bottom))}
+@media(max-height:740px){
+ .entry-v13-scroll{padding-top:10px;padding-bottom:10px}
+ .entry-v13-card{padding-top:10px}
+ .entry-v13-amount-wrap{min-height:56px}
+ #entryAmountV13{font-size:37px}
+ .entry-v13-field{min-height:57px}
+ .entry-v13-pad{gap:4px;padding:5px 8px calc(7px + env(safe-area-inset-bottom))}
+ .entry-v13-pad button{min-height:39px;font-size:21px}
+}
+@media(max-width:360px){.entry-v13-head{grid-template-columns:73px 1fr 73px}.entry-v13-head h2{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.entry-v13 button{transition:none!important}}
 </style></head><body><div class="shell">
 <header class="head v12-head">
   <div class="headtop v12-top">
@@ -202,7 +268,7 @@ button.tx-detail-trigger .value{font-size:14px;font-weight:850;white-space:nowra
  <div class="card" id="recurringList"></div>
  <div class="notice">يُسجّل الدخل المتكرر في تاريخ استحقاقه عند فتح التطبيق في ذلك اليوم أو بعده. لن تُنشأ العملية مرتين للشهر نفسه.</div>
 </section>
-<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 12 — الواجهة المحسّنة</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button>
+<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 13 — إدخال منظم على الآيفون</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button>
 <button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
 <button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button>
 <button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
@@ -217,6 +283,53 @@ button.tx-detail-trigger .value{font-size:14px;font-weight:850;white-space:nowra
 </main></div>
 <nav class="bottom" aria-label="التنقل"><button class="active" data-go="home"><span>⌂</span>الرئيسية</button><button data-go="transactions"><span>⇄</span>المعاملات</button><button data-go="savings"><span>▣</span>الادخار</button><button data-go="receivables"><span>⇣</span>مستحقاتي</button><button data-go="settings"><span>⚙</span>الإعدادات</button></nav>
 <div id="quickEntry" class="entrybar" aria-label="الإدخال السريع"><div class="first"><button type="button" class="quick-close" id="entryClose" aria-label="إغلاق الإدخال السريع">×</button><button class="toggle active" id="quickExpense">− مصروف</button><button class="toggle" id="quickIncome">＋ دخل</button><button type="button" class="category-trigger" id="categoryPickerBtn">اختر التصنيف ▾</button><select id="quickCategory" aria-label="التصنيف" class="sr-hidden-select"></select><button class="toggle" id="quickNewCategory" aria-label="إضافة تصنيف">＋</button><button type="button" class="toggle" id="smartPasteEntryOpen" aria-label="لصق رسالة بنكية">📋 لصق</button></div><div class="second"><input id="quickAmount" inputmode="decimal" type="number" step="0.01" min="0.01" placeholder="المبلغ" aria-label="المبلغ"><input id="quickNote" placeholder="وصف العملية" aria-label="وصف العملية"><button class="btn" id="quickSave" aria-label="حفظ العملية">✓</button></div></div>
+<dialog id="entryFullV13" class="entry-v13" aria-labelledby="entryTitleV13" dir="rtl">
+  <div class="entry-v13-frame">
+    <header class="entry-v13-head">
+      <button type="button" id="entryCloseV13" class="entry-v13-back" aria-label="الرجوع دون حفظ"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg><span>رجوع</span></button>
+      <h2 id="entryTitleV13">إضافة مصروف</h2>
+      <span class="entry-v13-head-space"></span>
+    </header>
+    <div class="entry-v13-scroll">
+      <div class="entry-v13-type" role="group" aria-label="نوع العملية">
+        <button type="button" id="entryExpenseV13" class="is-active" aria-pressed="true">− مصروف</button>
+        <button type="button" id="entryIncomeV13" aria-pressed="false">＋ دخل</button>
+      </div>
+      <div class="entry-v13-card">
+        <div class="entry-v13-amount-label">المبلغ</div>
+        <div class="entry-v13-amount-wrap"><output id="entryAmountV13" aria-label="المبلغ بالريال" aria-live="polite">0</output><span>ر.س</span></div>
+        <div class="entry-v13-expression" id="entryExpressionV13" aria-live="polite"></div>
+        <div class="entry-v13-fields">
+          <button type="button" id="entryCategoryV13" class="entry-v13-field entry-v13-category" aria-label="اختيار تصنيف العملية">
+            <span class="entry-v13-field-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h9l9 9-8 8-10-10V4Z"/><circle cx="8" cy="8" r="1.5"/></svg></span>
+            <span class="entry-v13-field-text"><small>التصنيف</small><strong id="entryCategoryLabelV13">اختر تصنيف المصروف</strong></span>
+            <span class="entry-v13-chevron">‹</span>
+          </button>
+          <label class="entry-v13-field">
+            <span class="entry-v13-field-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span>
+            <span class="entry-v13-field-text"><small>تاريخ العملية</small><input type="date" id="entryDateV13" required aria-label="تاريخ العملية"></span>
+          </label>
+          <label class="entry-v13-field">
+            <span class="entry-v13-field-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 5h16M4 11h16M4 17h9"/></svg></span>
+            <span class="entry-v13-field-text"><small>الوصف (اختياري)</small><input type="text" id="entryNoteV13" maxlength="200" autocomplete="off" placeholder="مثل: وقود السيارة أو اسم المتجر" aria-label="وصف العملية"></span>
+          </label>
+        </div>
+      </div>
+      <p class="entry-v13-hint">حدد التصنيف والتاريخ، ثم احفظ العملية. لا يُحفظ شيء قبل الضغط على حفظ.</p>
+      <button type="button" id="entrySaveV13" class="entry-v13-save">✓ حفظ المصروف</button>
+    </div>
+    <div class="entry-v13-pad" id="entryPadV13" role="group" aria-label="لوحة الأرقام">
+      <button type="button" data-key="C" class="entry-v13-op" aria-label="مسح المبلغ">C</button>
+      <button type="button" data-key="/" class="entry-v13-op" aria-label="قسمة">÷</button>
+      <button type="button" data-key="*" class="entry-v13-op" aria-label="ضرب">×</button>
+      <button type="button" data-key="backspace" class="entry-v13-op" aria-label="حذف رقم">⌫</button>
+      <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button><button type="button" data-key="-" class="entry-v13-op" aria-label="طرح">−</button>
+      <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button><button type="button" data-key="+" class="entry-v13-op" aria-label="جمع">+</button>
+      <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button><button type="button" data-key="=" class="entry-v13-equal" aria-label="حساب الناتج">=</button>
+      <button type="button" data-key=".">.</button><button type="button" data-key="0">0</button><button type="button" data-key="00">00</button><button type="button" data-key="save" class="entry-v13-pad-save" aria-label="حفظ العملية">✓</button>
+    </div>
+  </div>
+</dialog>
 <dialog class="dialog" id="modal"><div class="dialoghead"><h3 id="modalTitle"></h3><button id="modalClose" aria-label="إغلاق">×</button></div><div class="dialogbody" id="modalBody"></div></dialog>
 
 <dialog id="smartPasteDialog" class="smart-paste-dialog" aria-labelledby="smartPasteTitle" dir="rtl">
@@ -554,7 +667,7 @@ function treeModal(type,mode='pick'){
      // existing categories and legacy values remain valid
      refreshSelect(el('quickCategory'),catOptions(type),val);
      el('quickCategory').value=val;
-     selectedCategoryText();closeModal();
+     selectedCategoryText();closeModal();window.dispatchEvent(new CustomEvent('masareefi-category-picked',{detail:{type,category:val}}));
     }else{
      show();
     }
@@ -1284,5 +1397,181 @@ body:has(#quickEntry[data-expanded="yes"]) #p-home .v12-home-actions{display:non
  button.addEventListener('click',function(){
    if(form.dataset.expanded!=='yes'&&typeof setQuickType==='function')setQuickType('expense');
  },true);
+})();
+</script><script id="entry-v13-controller">
+function entryKeyLogicV13(current,key){
+ const state={...current,error:''};
+ const operators=['+','-','*','/'];
+ function roundMoney(x){return Math.round((x+Number.EPSILON)*100)/100}
+ function calculate(a,b,op){
+  if(op==='+')return roundMoney(a+b);
+  if(op==='-')return roundMoney(a-b);
+  if(op==='*')return roundMoney(a*b);
+  if(op==='/')return b===0?NaN:roundMoney(a/b);
+  return NaN;
+ }
+ function clearAll(){return {amount:'',stored:null,operator:null,next:false,error:''}}
+ if(key==='C')return clearAll();
+ if(key==='backspace'){
+  if(state.next){state.operator=null;state.stored=null;state.next=false;return state}
+  state.amount=state.amount.slice(0,-1);
+  return state;
+ }
+ if(key==='='){
+  if(!state.operator||state.next)return state;
+  const result=calculate(state.stored,Number(state.amount||0),state.operator);
+  if(!Number.isFinite(result)||Math.abs(result)>99999999999){return {...state,error:'تعذر حساب المبلغ. تحقق من العملية أو استخدم C.'}}
+  return {amount:String(result),stored:null,operator:null,next:false,error:''};
+ }
+ if(operators.includes(key)){
+  if(state.operator&&!state.next){
+   const result=calculate(state.stored,Number(state.amount||0),state.operator);
+   if(!Number.isFinite(result)||Math.abs(result)>99999999999)return {...state,error:'النتيجة غير صالحة. استخدم C للمسح.'};
+   state.stored=result;state.amount=String(result);
+  }else if(!state.operator){
+   if(!state.amount||state.amount==='.')return state;
+   state.stored=Number(state.amount);
+  }
+  state.operator=key;
+  state.next=true;
+  return state;
+ }
+ if(!/^(?:\d{1,2}|\.)$/.test(key))return state;
+ if(state.next){state.amount='';state.next=false}
+ const candidate=state.amount+key;
+ if(key==='.'&&state.amount.includes('.'))return state;
+ const raw=state.amount===''&&key==='.'?'0.':candidate;
+ const [whole,decimal]=raw.split('.');
+ if(whole.replace(/^0+/,'').length>11)return state;
+ if(decimal!==undefined&&decimal.length>2)return state;
+ state.amount=raw.replace(/^0+(?=\d)/,'');
+ return state;
+}
+(function setupEntryV13(){
+ 'use strict';
+ const dialog=document.getElementById('entryFullV13');
+ const launch=document.getElementById('entryLauncher');
+ const legacy=document.getElementById('quickEntry');
+ const amountOut=document.getElementById('entryAmountV13');
+ const expression=document.getElementById('entryExpressionV13');
+ const amountCard=document.getElementById('entrySaveV13');
+ const noteField=document.getElementById('entryNoteV13');
+ const dateField=document.getElementById('entryDateV13');
+ const picker=document.getElementById('entryCategoryV13');
+ const categoryText=document.getElementById('entryCategoryLabelV13');
+ if(!dialog||!launch||!legacy)return;
+ let type='expense',category='',calc={amount:'',stored:null,operator:null,next:false,error:''},busy=false;
+ function displayNumber(){
+  const raw=calc.amount||'0',parts=raw.split('.');
+  const integer=Number(parts[0]||0).toLocaleString('en-US');
+  return integer+(parts.length>1?'.'+parts[1]:'');
+ }
+ function show(){
+  amountOut.textContent=displayNumber();
+  const symbols={'+':'+','-':'−','*':'×','/':'÷'};
+  expression.textContent=calc.error||(calc.operator?String(calc.stored)+' '+symbols[calc.operator]+(calc.next?'': ' '+displayNumber()):'');
+  categoryText.textContent=category||('اختر تصنيف '+(type==='expense'?'المصروف':'الدخل'));
+  if(category&&typeof categoryIconSvg==='function'){
+    const icon=picker.querySelector('.entry-v13-field-icon');
+    icon.innerHTML=categoryIconSvg(category.split(' / ').pop()||category);
+  }
+  const isExpense=type==='expense';
+  document.getElementById('entryTitleV13').textContent=isExpense?'إضافة مصروف':'إضافة دخل';
+  amountCard.textContent=isExpense?'✓ حفظ المصروف':'✓ حفظ الدخل';
+  const expense=document.getElementById('entryExpenseV13');
+  const income=document.getElementById('entryIncomeV13');
+  expense.classList.toggle('is-active',isExpense);
+  income.classList.toggle('is-active',!isExpense);
+  expense.setAttribute('aria-pressed',String(isExpense));
+  income.setAttribute('aria-pressed',String(!isExpense));
+ }
+ function chooseType(t){
+  if(type!==t){type=t;category='';}
+  if(typeof setQuickType==='function')setQuickType(t);
+  show();
+ }
+ function open(t){
+  if(dialog.open)return;
+  const normalized=t==='income'?'income':'expense';
+  type=normalized;category='';calc={amount:'',stored:null,operator:null,next:false,error:''};
+  noteField.value='';dateField.value=today();
+  if(typeof setQuickType==='function')setQuickType(normalized);
+  legacy.dataset.expanded='no';legacy.classList.remove('show');
+  launch.setAttribute('aria-expanded','false');
+  dialog.classList.remove('note-focused');
+  show();
+  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
+  document.body.classList.add('entry-v13-open');
+ }
+ function close(){
+  if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
+  if(dialog.open&&typeof dialog.close==='function')dialog.close();
+  else dialog.removeAttribute('open');
+  document.body.classList.remove('entry-v13-open');
+  dialog.classList.remove('note-focused');
+ }
+ function save(){
+  if(busy)return;
+  if(calc.operator){
+   if(calc.next){expression.textContent='أكمل العملية الحسابية ثم اضغط =';return}
+   calc=entryKeyLogicV13(calc,'=');
+   show();
+  }
+  const amount=Number(calc.amount);
+  if(!Number.isFinite(amount)||amount<=0||Math.round(amount*100)!==amount*100&&Math.abs(Math.round(amount*100)-amount*100)>1e-6||amount>99999999999){
+   expression.textContent='أدخل مبلغًا صحيحًا أكبر من صفر';return;
+  }
+  if(!category){categoryText.textContent='اختر التصنيف أولًا';picker.focus();return}
+  const day=dateField.value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||Number.isNaN(Date.parse(day+'T12:00:00'))){
+   alert('اختر تاريخًا صحيحًا للعملية');dateField.focus();return;
+  }
+  const transaction={id:id(),type,amount:Math.round(amount*100)/100,category,categoryParent:category.split(' / ')[0],
+    date:day,note:conciseMerchant(noteField.value.trim())||noteField.value.trim(),method:'cash'};
+  busy=true;amountCard.disabled=true;
+  const previousMonth=month;
+  try{
+   data.transactions.unshift(transaction);
+   if(month!==day.slice(0,7)){month=day.slice(0,7);document.getElementById('month').value=month}
+   persist();
+   close();
+  }catch(err){
+   data.transactions=data.transactions.filter(t=>t.id!==transaction.id);
+   month=previousMonth;document.getElementById('month').value=previousMonth;
+   expression.textContent='تعذر الحفظ، لم تُسجل العملية. حاول مجددًا.';
+  }finally{busy=false;amountCard.disabled=false}
+ }
+ launch.addEventListener('click',function(e){e.preventDefault();e.stopImmediatePropagation();open('expense')},true);
+ document.addEventListener('click',function(e){
+  const target=e.target.closest('[data-open-entry]');
+  if(!target||dialog.contains(target))return;
+  e.preventDefault();e.stopImmediatePropagation();open(target.dataset.openEntry);
+ },true);
+ document.getElementById('entryCloseV13').addEventListener('click',close);
+ document.getElementById('entryExpenseV13').addEventListener('click',()=>chooseType('expense'));
+ document.getElementById('entryIncomeV13').addEventListener('click',()=>chooseType('income'));
+ picker.addEventListener('click',function(){
+  setQuickType(type);
+  const q=document.getElementById('quickCategory');
+  q.value=category||'';
+  treeModal(type,'pick');
+ });
+ window.addEventListener('masareefi-category-picked',function(e){
+  if(!dialog.open||e.detail?.type!==type)return;
+  category=e.detail.category||'';
+  show();
+ });
+ const pad=document.getElementById('entryPadV13');
+ pad.addEventListener('click',function(e){
+  const key=e.target.closest('[data-key]');
+  if(!key)return;
+  if(key.dataset.key==='save'){save();return}
+  calc=entryKeyLogicV13(calc,key.dataset.key);show();
+ });
+ amountCard.addEventListener('click',save);
+ noteField.addEventListener('focus',()=>{dialog.classList.add('note-focused');setTimeout(()=>noteField.scrollIntoView({block:'center',behavior:'smooth'}),80)});
+ noteField.addEventListener('blur',()=>dialog.classList.remove('note-focused'));
+ dialog.addEventListener('close',()=>{document.body.classList.remove('entry-v13-open');dialog.classList.remove('note-focused')});
+ dialog.addEventListener('cancel',e=>{e.preventDefault();close()});
 })();
 </script></body></html>
