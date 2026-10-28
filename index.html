@@ -63,6 +63,7 @@
 </section>
 <section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button>
 <button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
+<button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button>
 <button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
 <section class="page" id="p-receipts"><div class="screenhead"><h2>أرشيف الفواتير</h2></div>
 <div class="notice">تُحفظ المرفقات محليًا في المتصفح. احفظ نسخة احتياطية شاملة على Drive أو iCloud لحماية الصور والملفات.</div>
@@ -74,8 +75,24 @@
 </div><div class="card"><p>تصدير نسخة كاملة إلى السحابة يدويًا أو استرجاع نسخة محفوظة. ستتضمن النسخة الجديدة صور الفواتير وملفات PDF وتواريخ الضمان.</p><div class="actions"><button class="btn" id="shareBackup">☁ مشاركة النسخة</button><button class="btn secondary" id="downloadBackup">تنزيل JSON</button><button class="btn outline" id="exportCsv">تصدير CSV</button></div><div class="field" style="margin-top:16px"><label>استعادة نسخة JSON من الملفات / Drive / iCloud</label><input id="restoreFile" type="file" accept=".json,application/json"></div><p class="footnote">استرجاع النسخة يستبدل جميع البيانات الحالية بعد التأكيد. احفظ نسخة احتياطية قبل الاسترجاع.</p></div></section>
 </main></div>
 <nav class="bottom" aria-label="التنقل"><button class="active" data-go="home"><span>⌂</span>الرئيسية</button><button data-go="transactions"><span>⇄</span>المعاملات</button><button data-go="savings"><span>▣</span>الادخار</button><button data-go="receivables"><span>⇣</span>مستحقاتي</button><button data-go="settings"><span>⚙</span>الإعدادات</button></nav>
-<button type="button" id="entryLauncher" class="entry-launcher" aria-label="إضافة دخل أو مصروف" aria-expanded="false"><span>＋</span> إضافة دخل أو مصروف</button><div id="quickEntry" class="entrybar" aria-label="الإدخال السريع"><div class="first"><button type="button" class="quick-close" id="entryClose" aria-label="إغلاق الإدخال السريع">×</button><button class="toggle active" id="quickExpense">− مصروف</button><button class="toggle" id="quickIncome">＋ دخل</button><button type="button" class="category-trigger" id="categoryPickerBtn">اختر التصنيف ▾</button><select id="quickCategory" aria-label="التصنيف" class="sr-hidden-select"></select><button class="toggle" id="quickNewCategory" aria-label="إضافة تصنيف">＋</button></div><div class="second"><input id="quickAmount" inputmode="decimal" type="number" step="0.01" min="0.01" placeholder="المبلغ" aria-label="المبلغ"><input id="quickNote" placeholder="وصف العملية" aria-label="وصف العملية"><button class="btn" id="quickSave" aria-label="حفظ العملية">✓</button></div></div>
+<button type="button" id="entryLauncher" class="entry-launcher" aria-label="إضافة دخل أو مصروف" aria-expanded="false"><span>＋</span> إضافة دخل أو مصروف</button><div id="quickEntry" class="entrybar" aria-label="الإدخال السريع"><div class="first"><button type="button" class="quick-close" id="entryClose" aria-label="إغلاق الإدخال السريع">×</button><button class="toggle active" id="quickExpense">− مصروف</button><button class="toggle" id="quickIncome">＋ دخل</button><button type="button" class="category-trigger" id="categoryPickerBtn">اختر التصنيف ▾</button><select id="quickCategory" aria-label="التصنيف" class="sr-hidden-select"></select><button class="toggle" id="quickNewCategory" aria-label="إضافة تصنيف">＋</button><button type="button" class="toggle" id="smartPasteEntryOpen" aria-label="لصق رسالة بنكية">📋 لصق</button></div><div class="second"><input id="quickAmount" inputmode="decimal" type="number" step="0.01" min="0.01" placeholder="المبلغ" aria-label="المبلغ"><input id="quickNote" placeholder="وصف العملية" aria-label="وصف العملية"><button class="btn" id="quickSave" aria-label="حفظ العملية">✓</button></div></div>
 <dialog class="dialog" id="modal"><div class="dialoghead"><h3 id="modalTitle"></h3><button id="modalClose" aria-label="إغلاق">×</button></div><div class="dialogbody" id="modalBody"></div></dialog>
+
+<dialog id="smartPasteDialog" class="smart-paste-dialog" aria-labelledby="smartPasteTitle" dir="rtl">
+ <div class="smart-paste-header"><strong id="smartPasteTitle">📋 لصق رسالة بنكية</strong><button type="button" id="smartPasteClose" aria-label="إغلاق">✕</button></div>
+ <p class="smart-help">انسخ رسالة البنك ثم اضغط «لصق» أو ضع النص يدويًا. راجع كل حقل قبل الحفظ؛ لن تُحفظ الرسالة تلقائيًا.</p>
+ <div class="smart-actions"><button class="btn secondary" type="button" id="smartPasteClipboard">لصق من الحافظة</button><button class="btn outline" type="button" id="smartPasteAnalyze">تحليل الرسالة</button></div>
+ <label class="smart-label" for="smartPasteRaw">نص الرسالة</label>
+ <textarea id="smartPasteRaw" rows="4" dir="auto" placeholder="مثال: عملية شراء بمبلغ 125.50 ريال من متجر بتاريخ 28/10/2026"></textarea>
+ <div id="smartPasteStatus" class="smart-paste-status" role="status" aria-live="polite">لا يُحفظ أي شيء قبل مراجعتك.</div>
+ <form id="smartPasteForm">
+  <div class="smart-form-row"><label>نوع العملية<select id="smartPasteType"><option value="expense">مصروف</option><option value="income">دخل</option></select></label><label>المبلغ (ر.س)<input id="smartPasteAmount" type="number" step="0.01" min="0.01" inputmode="decimal" required></label></div>
+  <label>التصنيف<select id="smartPasteCategory" required></select></label>
+  <label>التاريخ<input id="smartPasteDate" type="date" required></label>
+  <label>الوصف<input id="smartPasteDescription" type="text" maxlength="160" placeholder="وصف مختصر للعملية"></label>
+  <div class="smart-actions"><button class="btn" type="submit">تأكيد وحفظ العملية</button><button type="button" class="btn outline" id="smartPasteCancel">إلغاء</button></div>
+ </form>
+</dialog>
 <script>
 'use strict';
 const KEY='masareefi_v2_review_20261028_isolated',types=['income','expense'];
@@ -723,5 +740,127 @@ body:has(select:focus) #entryLauncher { display:none!important; }
    });
  }
  sync();
+})();
+</script><style id="smart-paste-2-styles">
+.smart-paste-dialog{width:min(94vw,520px);max-height:min(86dvh,760px);overflow-y:auto;box-sizing:border-box;border:1px solid #d8e6d8;border-radius:20px;background:#fff;color:#243227;padding:19px;box-shadow:0 20px 65px #0004;position:fixed}
+.smart-paste-dialog::backdrop{background:rgba(10,25,13,.6)}
+.smart-paste-header{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:20px}
+.smart-paste-header button{width:40px;height:40px;border:0;border-radius:12px;font-size:21px;color:#233526;background:#eef5ee}
+.smart-help{font-size:13px;line-height:1.7;color:#536258;margin:9px 0 13px}
+.smart-actions{display:flex;flex-wrap:wrap;gap:9px;margin:13px 0}
+.smart-paste-dialog label,.smart-label{display:block;font-size:13px;font-weight:700;margin-top:10px}
+.smart-paste-dialog input,.smart-paste-dialog select,.smart-paste-dialog textarea{display:block;width:100%;box-sizing:border-box;margin-top:7px;min-height:45px;padding:10px 12px;border:1px solid #d2dfd3;border-radius:12px;background:#fff;color:#1d3327;font:inherit;font-size:16px}
+.smart-paste-dialog textarea{min-height:100px;line-height:1.65;resize:vertical}
+.smart-form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.smart-paste-status{font-size:12px;background:#f0f8ee;color:#355a3a;padding:10px;border-radius:10px;line-height:1.7}
+#smartPasteEntryOpen{flex:0 0 auto!important;min-width:65px!important;font-size:12px!important}
+@media(max-width:430px){.smart-paste-dialog{padding:13px;max-height:83dvh}.smart-paste-dialog .btn{font-size:13px}.smart-form-row{gap:7px}}
+</style><script id="smart-paste-2-script">
+(function(){
+'use strict';
+const e=id=>document.getElementById(id);
+const dialog=e('smartPasteDialog'),raw=e('smartPasteRaw'),status=e('smartPasteStatus');
+if(!dialog||!raw)return;
+const symbols=/^(?:SAR|ر\.?\s*س\.?|ريال(?:\s*سعودي)?|﷼)$/i;
+function normalize(str){
+ const ar='٠١٢٣٤٥٦٧٨٩',pers='۰۱۲۳۴۵۶۷۸۹';
+ return String(str||'').replace(/[٠-٩۰-۹]/g,c=>{const i=ar.indexOf(c);return String(i>=0?i:pers.indexOf(c))}).replace(/[\u200e\u200f\u061c]/g,'');
+}
+function amountNumber(str){
+ let v=str.trim().replace(/[\s٬]/g,'').replace(/٫/g,'.');
+ if(v.includes(',')&&v.includes('.')) v=v.lastIndexOf(',')>v.lastIndexOf('.')?v.replace(/\./g,'').replace(',','.'):v.replace(/,/g,'');
+ else if(v.includes(',')){
+   const p=v.split(',');v=(p.length===2&&p[1].length<=2)?p[0].replace(/,/g,'')+'.'+p[1]:v.replace(/,/g,'');
+ }else if((v.match(/\./g)||[]).length>1){const p=v.split('.');const tail=p.pop();v=p.join('')+(tail.length<=2?'.':'')+tail}
+ const n=Number(v);return Number.isFinite(n)&&n>0&&n<=99999999999?n:null;
+}
+function findAmount(text){
+ const num='([0-9][0-9.,٬٫ ]{0,19})';
+ const money='(?:SAR|ر\\.?\\s*س\\.?|ريال(?:\\s*سعودي)?|﷼)';
+ const patterns=[
+ new RegExp('(?:المبلغ|بمبلغ|قيمة\\s+العملية|مبلغ\\s+العملية|amount|amt)\\s*[:：-]?\\s*(?:'+money+'\\s*)?'+num+'(?:\\s*'+money+')?','gi'),
+ new RegExp(money+'\\s*'+num,'gi'),
+ new RegExp(num+'\\s*'+money,'gi')
+ ];
+ for(const pattern of patterns){let m;while((m=pattern.exec(text))){const a=amountNumber(m[1]);if(a!==null)return a}}
+ return null;
+}
+function findDate(text){
+ let m=text.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
+ let y,mo,d;
+ if(m){y=+m[1];mo=+m[2];d=+m[3]}
+ else{m=text.match(/\b(\d{1,2})[-/](\d{1,2})[-/](20\d{2})\b/);if(!m)return null;d=+m[1];mo=+m[2];y=+m[3]}
+ const x=new Date(y,mo-1,d);
+ return x.getFullYear()===y&&x.getMonth()+1===mo&&x.getDate()===d?`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`:null;
+}
+function categories(){
+ const type=e('smartPasteType').value;
+ let opts=[];
+ try{opts=catOptions(type)||[]}catch(_){}
+ const select=e('smartPasteCategory'),previous=select.value;
+ select.replaceChildren(...opts.map(name=>new Option(name,name)));
+ if(opts.includes(previous))select.value=previous;
+}
+function guessCategory(text,type){
+ const groups=type==='income'?[['راتب','salary'],['عمل إضافي','freelance']]:[
+ ['طعام','مطعم','سوبر','ماركت','قهوة','مقهى','food','restaurant'],
+ ['سيارة','بنزين','وقود','fuel','car'],
+ ['منزل','إيجار','كهرباء','ماء','فاتورة','rent','electric'],
+ ['صحي','صيدلية','مستشفى','علاج','clinic','pharmacy'],
+ ['تسوق','متجر','shop','purchase']];
+ const opts=[...e('smartPasteCategory').options].map(x=>x.value);
+ for(const words of groups){if(words.some(w=>text.toLowerCase().includes(w.toLowerCase()))){const candidate=opts.find(o=>o.includes(words[0])||words.some(w=>o.toLowerCase().includes(w.toLowerCase())));if(candidate)return candidate}}
+ return opts[0]||'';
+}
+function analyze(){
+ const txt=normalize(raw.value).replace(/\s+/g,' ').trim();
+ if(!txt){status.textContent='الصق نص الرسالة أولاً.';return}
+ const isOutgoing=/(?:شراء|نقاط\s*بيع|خصم|سحب|حوالة\s*صادرة|تحويل\s*صادر|مدين|paid|purchase|debit)/i.test(txt);
+ const isIncoming=/(?:راتب|إيداع|حوالة\s*واردة|تحويل\s*وارد|دائن|received|credited|salary|deposit)/i.test(txt);
+ e('smartPasteType').value=isIncoming&&!isOutgoing?'income':'expense';categories();
+ const amount=findAmount(txt);e('smartPasteAmount').value=amount===null?'':String(amount);
+ e('smartPasteDate').value=findDate(txt)||today();
+ e('smartPasteCategory').value=guessCategory(txt,e('smartPasteType').value);
+ const shop=txt.match(/(?:لدى|من\s+متجر|عند|merchant|from)\s*[:：-]?\s*([^،.;]{2,48})/i);
+ e('smartPasteDescription').value=(shop?shop[1].trim():txt).slice(0,160);
+ status.textContent=amount===null?'لم أحدد المبلغ بثقة؛ أدخله يدويًا ثم راجع باقي الحقول.':'تم استخراج بيانات أولية. راجع المبلغ ونوع العملية والتصنيف والتاريخ قبل الحفظ.';
+}
+function open(){
+ if(!dialog.open)dialog.showModal();
+ e('smartPasteType').value='expense';categories();
+ e('smartPasteDate').value=today();
+ status.textContent='الصق الرسالة ثم اضغط «تحليل الرسالة». لا يتم حفظ النص تلقائيًا.';
+}
+e('smartPasteSettingsOpen').addEventListener('click',open);
+e('smartPasteEntryOpen').addEventListener('click',open);
+e('smartPasteClose').addEventListener('click',()=>dialog.close());
+e('smartPasteCancel').addEventListener('click',()=>dialog.close());
+e('smartPasteAnalyze').addEventListener('click',analyze);
+e('smartPasteType').addEventListener('change',categories);
+e('smartPasteClipboard').addEventListener('click',async()=>{
+ try{
+  if(!navigator.clipboard?.readText)throw Error('clipboard-unavailable');
+  const text=await navigator.clipboard.readText();if(!text){status.textContent='الحافظة فارغة، الصق الرسالة داخل مربع النص.';raw.focus();return}
+  raw.value=text;analyze();
+ }catch(_){status.textContent='تعذرت قراءة الحافظة. اضغط مطولًا داخل مربع النص واختر «لصق»، ثم حلّل الرسالة.';raw.focus()}
+});
+e('smartPasteForm').addEventListener('submit',ev=>{
+ ev.preventDefault();
+ const amount=Number(e('smartPasteAmount').value),type=e('smartPasteType').value,category=e('smartPasteCategory').value,date=e('smartPasteDate').value;
+ if(!Number.isFinite(amount)||amount<=0||amount>99999999999||!category||!/^20\d{2}-\d{2}-\d{2}$/.test(date)){
+  status.textContent='أكمل المبلغ والتصنيف والتاريخ بشكل صحيح.';return;
+ }
+ const srcText=normalize(raw.value).trim();
+ if(!srcText){status.textContent='ألصق الرسالة أولًا قبل حفظها.';return}
+ // Duplicate protection applies to this same message only, not identical legitimate charges.
+ const sourceKey='message:'+srcText.replace(/\s+/g,' ').toLowerCase();
+ if(data.transactions.some(t=>t.smartPasteSource===sourceKey)){
+  status.textContent='هذه الرسالة أُضيفت سابقًا. لم تُسجّل عملية مكررة.';return;
+ }
+ if(!confirm('هل تؤكد إضافة '+amount+' ر.س ضمن '+(type==='income'?'الدخل':'المصروفات')+'؟'))return;
+ data.transactions.unshift({id:id(),type,amount,category,categoryParent:category.split(' / ')[0],date,
+  note:e('smartPasteDescription').value.trim(),method:'cash',smartPasteSource:sourceKey});
+ persist();dialog.close();raw.value='';e('smartPasteAmount').value='';
+});
 })();
 </script></body></html>
