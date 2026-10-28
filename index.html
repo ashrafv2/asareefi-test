@@ -83,13 +83,23 @@
 .tree-choice .cat-text small{display:block;font-size:10px;font-weight:600;opacity:.7;margin-top:2px}
 @media(max-width:390px){.tree-grid{gap:6px}.tree-choice,.tree-choice.selected{gap:5px;padding:8px 5px;font-size:12px}.tree-choice .cat-icon{flex-basis:23px;width:23px;height:23px}.tree-choice .cat-svg{width:19px;height:19px}}
 @media(prefers-reduced-motion:reduce){.tree-choice{transition:none}}
-</style></head><body><div class="shell"><header class="head"><div class="headtop"><button class="iconbtn" data-go="settings" aria-label="الإعدادات">⚙</button><strong class="brand">مصاريفي <small style="font-size:10px;opacity:.85">2.0 • تحديث 7 — تصنيفات مصوّرة</small></strong><button class="iconbtn" data-go="reports" aria-label="التقارير">◴</button></div><div class="balances"><div class="balance-tile"><small>المتبقي الشهري</small><strong id="headNet">0 ر.س</strong></div><div class="balance-tile"><small>المدخرات</small><strong id="headSaving">0 ر.س</strong></div></div></header><main class="content">
+</style><style id="category-reorder-v8">
+.category-order-panel{border:1px solid var(--theme-line,#d3ead0);border-radius:14px;background:var(--theme-soft-2,#f6fcf5);padding:12px 10px;margin-top:12px;display:grid;gap:9px}
+.category-order-heading{font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.category-order-caption{font-size:11px;color:var(--muted);font-weight:600}
+.category-order-current{font-size:13px;color:var(--text);overflow-wrap:anywhere}
+.category-order-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.category-order-buttons button{min-width:0;border:1px solid var(--theme-line,#d3ead0);background:var(--card,#fff);color:var(--green-dark);font-size:13px;font-weight:800;border-radius:11px;min-height:43px;padding:8px 4px}
+.category-order-buttons button:disabled{opacity:.38;cursor:default}
+.category-order-hint{color:var(--muted);font-size:11px;line-height:1.5}
+@media(max-width:375px){.category-order-buttons button{font-size:12px}}
+</style></head><body><div class="shell"><header class="head"><div class="headtop"><button class="iconbtn" data-go="settings" aria-label="الإعدادات">⚙</button><strong class="brand">مصاريفي <small style="font-size:10px;opacity:.85">2.0 • تحديث 8 — ترتيب التصنيفات</small></strong><button class="iconbtn" data-go="reports" aria-label="التقارير">◴</button></div><div class="balances"><div class="balance-tile"><small>المتبقي الشهري</small><strong id="headNet">0 ر.س</strong></div><div class="balance-tile"><small>المدخرات</small><strong id="headSaving">0 ر.س</strong></div></div></header><main class="content">
 <section class="page active" id="p-home">
 <div class="smart-paste-home" role="group" aria-label="اللصق الذكي للعمليات البنكية">
  <button type="button" id="smartPasteHomeOpen" class="smart-paste-home-button"><span aria-hidden="true">📋</span><span><strong>لصق رسالة بنكية</strong><small>انسخ رسالة البنك لتحليل المبلغ وإضافة العملية</small></span><span aria-hidden="true">‹</span></button>
 </div>
 <div class="entry-launcher-home"><button type="button" id="entryLauncher" class="entry-launcher" aria-label="إضافة دخل أو مصروف" aria-expanded="false"><span>＋</span> إضافة دخل أو مصروف</button></div>
-<div class="release-indicator">الإصدار التجريبي 7 • التصنيفات المصوّرة</div>
+<div class="release-indicator">الإصدار التجريبي 8 • تحريك التصنيفات</div>
 <div class="monthbar"><button id="monthNext" aria-label="الشهر التالي">‹</button><input id="month" type="month" aria-label="الشهر المحدد"><button id="monthPrev" aria-label="الشهر السابق">›</button></div><div class="triplet"><div><strong id="sumExpense">0</strong><small>المصروفات</small></div><div><strong id="sumIncome">0</strong><small>الدخل</small></div><div><strong id="sumNet">0</strong><small>المتبقي</small></div></div><div class="sectionbar"><h2>عمليات الشهر</h2><button class="subtlelink" data-go="transactions">عرض الكل ‹</button></div><div class="card" id="homeTransactions"></div><div class="sectionbar"><h2>إدارة أموالي</h2></div><div class="quickcards"><button data-go="savings"><span>▣</span>الادخار</button><button data-go="receivables"><span>⇣</span>مستحقاتي</button><button data-go="budget"><span>▥</span>الميزانية</button><button data-go="debts"><span>▤</span>الأقساط</button><button data-go="goals"><span>◎</span>الأهداف</button><button data-go="incomeLedger"><span>↙</span>سجل الدخل</button><button data-go="backup"><span>☁</span>النسخ</button><button data-go="receipts"><span>▧</span>الفواتير</button></div><div class="card" style="margin-top:13px"><div class="rowmain"><b>إجمالي المدخرات والمستحقات</b><small>أرصدة الادخار + المبالغ غير المحصلة المستحقة لك</small></div><div class="moneybig" id="allFunds">0 ر.س</div><div class="hint">لا يشمل دخل الشهر بشكل مستقل؛ وتظل المستحقات غير المحصلة غير متاحة للإنفاق.</div></div><div class="home-spacer"></div></section>
 <section class="page" id="p-transactions"><div class="screenhead"><h2>الدخل والمصروفات</h2><button class="btn secondary" data-open-entry="expense">＋ إضافة</button></div><div class="pills"><button class="pill active" data-filter="all">الكل</button><button class="pill" data-filter="income">الدخل</button><button class="pill" data-filter="expense">المصروفات</button></div><div class="card" id="allTransactions"></div></section>
 <section class="page" id="p-savings"><div class="screenhead"><h2>حساب الادخار</h2><button class="btn secondary" id="addAccountBtn">＋ حساب</button></div><div class="card"><div class="hint">مدخراتي (المبالغ الموجودة في الحسابات)</div><div id="savingsTotal" class="moneybig"></div><div class="finance-divider"></div><div class="finance-amount-row"><span>مستحقاتي غير المحصلة</span><strong id="savingsOwedTotal"></strong></div><div class="finance-divider"></div><div class="finance-total-label">إجمالي المدخرات والمستحقات</div><div id="savingsCombinedTotal" class="moneybig"></div><div class="hint">المجموع = أرصدة الادخار + المبالغ المستحقة لك. المستحقات ليست نقدًا متاحًا قبل تحصيلها.</div></div><div class="sectionbar"><h2>حساباتي</h2></div><div class="card" id="accountsList"></div><div class="mini-actions"><button id="depositBtn">＋ إيداع</button><button id="withdrawBtn">− سحب</button><button id="transferBtn">⇄ تحويل</button></div><div class="sectionbar"><h2>سجل الادخار</h2></div><div class="card" id="savingHistory"></div></section>
@@ -324,6 +334,39 @@ function categoryIconSvg(label){
  return '<svg class="cat-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+categorySvgPaths[k]+'</svg>';
 }
 
+
+/* v8: Keep the initial v7 visual order, then respect each user's own saved order. */
+function upgradeCategoryOrderV8(){
+ if(Number(data.categoryOrderVersion)>=8)return;
+ ensureTree();
+ for(const type of types){
+  const ranking=categoryOrderV7[type]||[];
+  const groups=data.categoryTree[type];
+  groups.sort((a,b)=>{
+    const ia=ranking.indexOf(a.name),ib=ranking.indexOf(b.name);
+    return (ia<0?1000:ia)-(ib<0?1000:ib);
+  });
+ }
+ data.categoryOrderVersion=8;
+ try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
+}
+/* Move a visible item without rearranging hidden ones or touching transaction records. */
+function moveVisibleCategoryV8(items,chosen,isVisible,direction){
+ const indices=[];
+ items.forEach((x,i)=>{if(isVisible(x))indices.push(i)});
+ let from=indices.findIndex(i=>items[i]===chosen);
+ if(from<0)return false;
+ let to=direction==='top'?0:direction==='up'?from-1:from+1;
+ if(to<0||to>=indices.length||to===from)return false;
+ const step=to<from?-1:1;
+ while(from!==to){
+   const i=indices[from],j=indices[from+step];
+   [items[i],items[j]]=[items[j],items[i]];
+   from+=step;
+ }
+ return true;
+}
+
 function manageCategories(){openTreeManager()}
 function treeModal(type,mode='pick'){
  ensureTree();
@@ -334,25 +377,37 @@ function treeModal(type,mode='pick'){
  let activeChild=picked.includes(' / ')?picked.split(' / ').slice(1).join(' / '):'';
  function categoryValue(g,child){return child?g.name+' / '+child:g.name}
  function show(){
+  // Keep each scroll position when a category is selected or reordered.
+  const previousParents=el('modalBody')?.querySelector('[data-order-column="parents"]')?.scrollTop||0;
+  const previousChildren=el('modalBody')?.querySelector('[data-order-column="children"]')?.scrollTop||0;
   const groups=data.categoryTree[type];
   const selected=groups.find(g=>g.name===activeParent)||groups[0];
   if(!selected)return;
-  const ranking=categoryOrderV7[type]||[];
-  const priority=x=>{const i=ranking.indexOf(x.name);return i<0?1000:i};
-  const visible=groups.filter(g=>!g.hidden).sort((a,b)=>priority(a)-priority(b));
+  // The order is owned by categoryTree and persists between sessions.
+  const visible=groups.filter(g=>!g.hidden);
   const picker=mode==='pick';
   openModal(picker?'اختيار التصنيف':'إدارة التصنيفات',`
   <div class="tabactions"><button id="treeExpense" class="${type==='expense'?'active':''}">مصروف</button><button id="treeIncome" class="${type==='income'?'active':''}">دخل</button></div>
   <div class="tree-grid">
-   <div class="tree-col"><b class="tree-title">الرئيسية</b>
+   <div class="tree-col" data-order-column="parents"><b class="tree-title">الرئيسية</b>
     ${visible.map(g=>`<button type="button" class="tree-choice ${g.name===selected.name?'selected':''}" data-parent="${safe(g.name)}" aria-pressed="${g.name===selected.name}"><span class="cat-icon">${categoryIconSvg(g.name)}</span><span class="cat-text">${safe(g.name)}</span></button>`).join('')}
    </div>
-   <div class="tree-col"><b class="tree-title">الفرعية</b>
+   <div class="tree-col" data-order-column="children"><b class="tree-title">الفرعية</b>
     <button type="button" class="tree-choice tree-child-choice ${!activeChild?'selected':''}" data-child=""><span class="cat-icon">${categoryIconSvg(selected.name)}</span><span class="cat-text">عام <small>${safe(selected.name)}</small></span></button>
     ${selected.children.filter(c=>!selected.hiddenChildren.includes(c)).map(c=>`<button type="button" class="tree-choice tree-child-choice ${c===activeChild?'selected':''}" data-child="${safe(c)}"><span class="cat-icon">${categoryIconSvg(c)}</span><span class="cat-text">${safe(c)}</span></button>`).join('')}
    </div>
   </div>
   ${picker?'<p class="footnote">اختر الفرعي أو «عام» لتسجيل العملية.</p>':''}
+  ${!picker?`<div class="category-order-panel">
+    <div class="category-order-heading">ترتيب التصنيفات <span class="category-order-caption">اختر تصنيفًا ثم حرّكه</span></div>
+    <div class="category-order-current">المحدد: <b>${safe(activeChild?selected.name+' / '+activeChild:selected.name)}</b></div>
+    <div class="category-order-buttons">
+       <button type="button" id="treeMoveTop" ${(activeChild?selected.children.filter(c=>!selected.hiddenChildren.includes(c)):visible).indexOf(activeChild||selected)===0?'disabled':''}>⇤ إلى الأول</button>
+       <button type="button" id="treeMoveUp" ${(activeChild?selected.children.filter(c=>!selected.hiddenChildren.includes(c)):visible).indexOf(activeChild||selected)===0?'disabled':''}>↑ للأعلى</button>
+       <button type="button" id="treeMoveDown" ${(activeChild?selected.children.filter(c=>!selected.hiddenChildren.includes(c)):visible).indexOf(activeChild||selected)===(activeChild?selected.children.filter(c=>!selected.hiddenChildren.includes(c)):visible).length-1?'disabled':''}>↓ للأسفل</button>
+    </div>
+    <small class="category-order-hint">ينعكس الترتيب فورًا في اختيار المصروفات والدخل، ولا يغيّر العمليات السابقة.</small>
+  </div>`:''}
   <div class="tree-tool">
    <button class="btn secondary" id="treeAddParent">＋ رئيسي</button>
    <button class="btn secondary" id="treeAddChild">＋ فرعي</button>
@@ -361,6 +416,24 @@ function treeModal(type,mode='pick'){
   </div>
   ${picker?'<button class="btn" id="treeOpenManage" style="margin-top:10px;width:100%">إدارة جميع التصنيفات</button>':''}
   `);
+  const parentsCol=el('modalBody').querySelector('[data-order-column="parents"]');
+  const childrenCol=el('modalBody').querySelector('[data-order-column="children"]');
+  if(parentsCol)parentsCol.scrollTop=previousParents;
+  if(childrenCol)childrenCol.scrollTop=previousChildren;
+  if(!picker){
+    for(const [key,direction] of [['treeMoveTop','top'],['treeMoveUp','up'],['treeMoveDown','down']]){
+      const button=el(key);
+      if(!button)continue;
+      button.onclick=()=>{
+        const target=activeChild||selected;
+        const didMove=activeChild
+          ?moveVisibleCategoryV8(selected.children,target,c=>!selected.hiddenChildren.includes(c),direction)
+          :moveVisibleCategoryV8(groups,target,g=>!g.hidden,direction);
+        if(!didMove)return;
+        persist();show();
+      };
+    }
+  }
   el('treeExpense').onclick=()=>treeModal('expense',mode);
   el('treeIncome').onclick=()=>treeModal('income',mode);
   el('modalBody').querySelectorAll('[data-parent]').forEach(btn=>btn.onclick=()=>{
@@ -376,7 +449,7 @@ function treeModal(type,mode='pick'){
      el('quickCategory').value=val;
      selectedCategoryText();closeModal();
     }else{
-     el('modalBody').querySelectorAll('[data-child]').forEach(x=>x.classList.toggle('selected',x===btn));
+     show();
     }
   });
   el('treeAddParent').onclick=()=>{
@@ -584,7 +657,7 @@ function renderExtra(transactions,inc,exp,net){
  reportUpdate(transactions,inc,exp,net)
 }
 function initExtra(){
- ensureTree();upgradeCategoryTreeV7();applyTheme();recurringCheck();
+ ensureTree();upgradeCategoryTreeV7();upgradeCategoryOrderV8();applyTheme();recurringCheck();
  el('categoryPickerBtn').onclick=()=>treeModal(quickType,'pick');
  el('themeColors').onclick=themePicker;
  el('addRecurring').onclick=createRecurring;
