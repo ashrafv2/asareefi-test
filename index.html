@@ -1269,4 +1269,20 @@ e('smartPasteForm').addEventListener('submit',ev=>{
  .v12-assets-total{flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){#p-home button{transition:none!important}}
-</style></body></html>
+</style>
+<style id="home-premium-v12-entry-safety">
+#p-home #entryLauncher[hidden]{display:none!important}
+body:has(#quickEntry.show) #p-home .v12-home-actions,
+body:has(#quickEntry[data-expanded="yes"]) #p-home .v12-home-actions{display:none!important}
+#p-home #entryLauncher:focus-visible,#p-home #smartPasteHomeOpen:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+</style>
+<script id="home-premium-v12-entry-default">
+(function(){
+ const button=document.getElementById('entryLauncher');
+ const form=document.getElementById('quickEntry');
+ if(!button||!form)return;
+ button.addEventListener('click',function(){
+   if(form.dataset.expanded!=='yes'&&typeof setQuickType==='function')setQuickType('expense');
+ },true);
+})();
+</script></body></html>
