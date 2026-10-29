@@ -292,6 +292,8 @@ function refreshStatus(){
  const hint=E('syncRememberedHintV21');
  if(hint)hint.textContent=session.remembered?'✓ اتصال هذا الجهاز محفوظ بشكل مشفر، ويمكن فتحه لاحقًا بعبارة التشفير.':
  'هذا الاتصال مفعّل في الجلسة الحالية فقط؛ يلزم تسجيل الدخول عند إعادة فتح التطبيق.';
+ const rememberButton=E('syncRememberDeviceV21');
+ if(rememberButton)rememberButton.textContent=session.remembered?'إلغاء تذكّر هذا الجهاز':'تذكّر هذا الجهاز';
 }
 function setNotice(msg){session.notice=msg;statusText(msg);refreshStatus()}
 function holdTimer(){if(session.timer)clearTimeout(session.timer);session.timer=null}
@@ -475,6 +477,7 @@ function openSettings(){
    '<p id="syncAccountLabelV19" class="footnote"></p>'+
    '<p id="syncRememberedHintV21" class="footnote"></p>'+
    '<div class="actions"><button type="button" id="syncNowV19" class="btn">مزامنة الآن</button>'+
+   '<button type="button" id="syncRememberDeviceV21" class="btn outline">تذكّر هذا الجهاز</button>'+
    '<button type="button" id="syncPushV19" class="btn secondary">رفع بيانات هذا الجهاز</button>'+
    '<button type="button" id="syncPullV19" class="btn outline">استلام البيانات من السحابة</button>'+
    '<button type="button" id="syncDisconnectV19" class="btn outline">قطع الاتصال</button></div>'+
@@ -515,6 +518,17 @@ function openSettings(){
    finally{submit.disabled=false;refreshStatus()}
   };
   E('syncNowV19').onclick=()=>synchronize(true);
+  E('syncRememberDeviceV21').onclick=async()=>{
+   if(!session.uid||!session.phrase)return setNotice('سجّل الدخول أولًا لتذكّر هذا الجهاز.');
+   if(session.remembered){
+    clearLock();setNotice('تم إلغاء تذكّر هذا الجهاز؛ المزامنة الحالية مستمرة ما دام التطبيق مفتوحًا.');
+    return;
+   }
+   if(!confirm('سيُحفظ رمز تجديد حساب Firebase مشفرًا بعبارة التشفير في هذا المتصفح فقط. عند فتح التطبيق ستحتاج إلى إدخال العبارة. هل تريد تذكّر هذا الجهاز؟'))return;
+   session.remembered=true;
+   try{await saveSessionLock();setNotice('✓ تذكّر هذا الجهاز مفعّل. سيُطلب إدخال عبارة التشفير فقط بعد إعادة فتح التطبيق.')}
+   catch(_){clearLock();setNotice('تعذر حفظ الاتصال المشفر في هذا المتصفح. سيبقى الاتصال الحالي فقط.')}
+  };
   E('syncPushV19').onclick=()=>{
    if(!confirm('سيتم رفع سجل هذا الجهاز واستبدال النسخة السحابية الحالية إن وجدت. تأكد من تنزيل نسخة احتياطية شاملة أولًا. هل تريد المتابعة؟'))return;
    synchronize(true,'upload');
