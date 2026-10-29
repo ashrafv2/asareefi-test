@@ -563,6 +563,12 @@ function openSettings(){
    '<div class="actions"><button type="button" class="btn outline" id="syncShowFullLoginV21">تسجيل الدخول الكامل</button>'+
     '<button type="button" class="btn outline" id="syncForgetDeviceV21">نسيان هذا الجهاز</button></div>'+
   '</div>'+
+  '<div id="syncPasskeyUnlockPanelV22" hidden>'+
+   '<p class="footnote">هذا الجهاز يستخدم Passkey؛ يمكن فتح المزامنة عبر Face ID أو Touch ID أو رمز القفل، بحسب إعدادات الجهاز. لا تُخزّن عبارة التشفير أو مفتاح فتح الاتصال دون حماية البصمة.</p>'+
+   '<button type="button" id="syncUnlockPasskeyV22" class="btn">فتح ببصمة الجهاز / رمز القفل</button>'+
+   '<div class="actions"><button type="button" id="syncPasskeyFullLoginV22" class="btn outline">تسجيل الدخول الكامل</button>'+
+    '<button type="button" id="syncPasskeyForgetV22" class="btn outline">نسيان اتصال الجهاز</button></div>'+
+  '</div>'+
   '<div id="syncLoginPanelV19">'+
    '<form id="syncLoginFormV19">'+
     '<div class="field"><label>معرّف مشروع Firebase</label><input name="projectId" dir="ltr" required autocomplete="off" value="'+safe(config.projectId||'')+'" placeholder="my-finance-project"></div>'+
@@ -577,6 +583,14 @@ function openSettings(){
   '<div id="syncConnectedControlsV19" hidden>'+
    '<p id="syncAccountLabelV19" class="footnote"></p>'+
    '<p id="syncRememberedHintV21" class="footnote"></p>'+
+   '<div class="card" style="padding:12px;margin:12px 0">'+
+    '<b>الدخول السريع في هذا الجهاز</b>'+
+    '<p class="footnote">اختر طريقة واحدة: <b>اتصال تلقائي</b> دون كلمة مرور على جهازك الشخصي، أو <b>Passkey</b> للتحقق ببصمة الوجه/الإصبع أو رمز الجهاز عند كل فتح (حسب دعم المتصفح).</p>'+
+    '<p class="footnote">⚠ الاتصال التلقائي يخزن رمز Firebase وعبارة تشفير السحابة بصورة مشفرة في هذا المتصفح بمفتاح محلي. لكنه لا يمنع من يفتح جهازك أو أي برنامج ضار يعمل ضمن صفحة التطبيق من الوصول للبيانات؛ فعّله فقط على جهاز شخصي محمي بقفل الشاشة.</p>'+
+    '<div class="actions"><button type="button" id="syncAutoV22" class="btn">تفعيل الاتصال التلقائي</button>'+
+    '<button type="button" id="syncPasskeyV22" class="btn outline">تفعيل بصمة الجهاز / رمز القفل</button>'+
+    '<button type="button" id="syncForgetV22" class="btn outline">إلغاء حفظ الدخول السريع</button></div>'+
+   '</div>'+
    '<div class="actions"><button type="button" id="syncNowV19" class="btn">مزامنة الآن</button>'+
    '<button type="button" id="syncRememberDeviceV21" class="btn outline">تذكّر هذا الجهاز</button>'+
    '<button type="button" id="syncPushV19" class="btn secondary">رفع بيانات هذا الجهاز</button>'+
@@ -588,9 +602,26 @@ function openSettings(){
   '<p id="syncCurrentStatusV19" class="sync-state-v19" role="status"></p>'+
   '<p class="footnote"><a href="https://github.com/ashrafv2/asareefi-test/blob/main/FIREBASE_SYNC_SETUP_AR.md" target="_blank" rel="noopener noreferrer">دليل إنشاء مشروع Firebase وتفعيل قواعد الأمان</a></p>';
  openModal('المزامنة المالية المشفرة',html,function(){
-  session.showLoginForm=!readLock();
+  session.showLoginForm=!(readLock()||vaultMeta);
   refreshStatus();
   E('syncShowFullLoginV21').onclick=()=>{session.showLoginForm=true;refreshStatus()};
+  E('syncPasskeyFullLoginV22').onclick=()=>{session.showLoginForm=true;refreshStatus()};
+  E('syncPasskeyForgetV22').onclick=async()=>{
+   if(!confirm('سيُلغى فتح الاتصال باستخدام البصمة على هذا الجهاز فقط؛ لن تُحذف السجلات المالية. متابعة؟'))return;
+   try{await forgetDeviceV22();session.showLoginForm=true;setNotice('تم نسيان اتصال الجهاز. استخدم تسجيل الدخول الكامل.')}
+   catch(e){setNotice('تعذر نسيان الجهاز: '+String(e.message||e))}
+  };
+  E('syncUnlockPasskeyV22').onclick=async()=>{
+   if(session.unlockBusy)return;
+   session.unlockBusy=true;
+   setNotice('جارٍ طلب بصمة الجهاز/رمز القفل…');
+   try{
+    const secrets=await vault().unlockPasskey();
+    await restoreDeviceConnection(secrets,'passkey');
+    setNotice('✓ تم فتح الاتصال ببصمة الجهاز والتحقق من نسخة Firebase. '+session.notice);
+   }catch(e){setNotice('تعذر فتح الاتصال ببصمة الجهاز: '+String(e.message||e))}
+   finally{session.unlockBusy=false;refreshStatus()}
+  };
   E('syncForgetDeviceV21').onclick=()=>{
    if(!confirm('سيتم حذف وسيلة الاتصال المشفرة المحفوظة محليًا فقط. لن تُحذف السجلات ولا بيانات Firebase. متابعة؟'))return;
    clearLock();session.showLoginForm=true;
@@ -619,6 +650,41 @@ function openSettings(){
    finally{submit.disabled=false;refreshStatus()}
   };
   E('syncNowV19').onclick=()=>synchronize(true);
+  E('syncAutoV22').onclick=async()=>{
+   if(!session.uid||!session.phrase)return setNotice('سجّل الدخول إلى Firebase أولًا.');
+   if(session.deviceMode==='automatic')return;
+   if(!confirm('هل هذا جهازك الشخصي والمحمي بقفل الشاشة؟ سيُحفظ رمز تجديد Firebase وعبارة تشفير المزامنة بصورة مشفرة محليًا، ويبدأ الاتصال تلقائيًا عند فتح مصاريفي دون طلب كلمة مرور. من يملك وصولًا إلى الجهاز المفتوح يستطيع فتح بيانات التطبيق. هل توافق؟'))return;
+   const btn=E('syncAutoV22');btn.disabled=true;
+   setNotice('جارٍ تفعيل الاتصال التلقائي المشفّر على هذا الجهاز…');
+   try{
+    if(!vault())throw Error('التخزين الآمن غير متاح في هذا المتصفح.');
+    await vault().rememberAutomatic(sessionSecrets());
+    clearLock();session.remembered=false;session.deviceMode='automatic';
+    await readDeviceMeta();
+    setNotice('✓ الاتصال التلقائي مفعّل. سيعيد مصاريفي الاتصال بـ Firebase عند فتح التطبيق دون إدخال أي بيانات.');
+   }catch(e){setNotice('تعذر تفعيل الاتصال التلقائي: '+String(e.message||e))}
+   finally{btn.disabled=false;refreshStatus()}
+  };
+  E('syncPasskeyV22').onclick=async()=>{
+   if(!session.uid||!session.phrase)return setNotice('سجّل الدخول إلى Firebase أولًا.');
+   if(session.deviceMode==='passkey')return;
+   if(!confirm('سيُنشأ Passkey لفتح المزامنة ببصمة الجهاز أو رمز القفل عند كل تشغيل. إذا لم يدعم متصفحك امتداد PRF فلن تُفعّل الميزة، وستظل بياناتك كما هي. متابعة؟'))return;
+   const btn=E('syncPasskeyV22');btn.disabled=true;
+   setNotice('جارٍ إعداد بصمة الجهاز لحماية الدخول…');
+   try{
+    if(!vault())throw Error('التخزين الآمن غير متاح.');
+    await vault().createPasskey(sessionSecrets());
+    clearLock();session.remembered=false;session.deviceMode='passkey';
+    await readDeviceMeta();
+    setNotice('✓ تم تفعيل الدخول ببصمة الجهاز. عند إعادة فتح مصاريفي اضغط فتح ببصمة الجهاز / رمز القفل.');
+   }catch(e){setNotice('تعذر تفعيل البصمة: '+String(e.message||e))}
+   finally{btn.disabled=false;refreshStatus()}
+  };
+  E('syncForgetV22').onclick=async()=>{
+   if(!confirm('إلغاء الاتصال السريع المخزّن على هذا الجهاز فقط؟ لن تُحذف بياناتك المالية أو السحابة.'))return;
+   try{await forgetDeviceV22();setNotice('تم إلغاء الدخول السريع. ستستمر المزامنة الحالية حتى إغلاق التطبيق.')}
+   catch(e){setNotice('تعذر إلغاء الدخول السريع: '+String(e.message||e))}
+  };
   E('syncRememberDeviceV21').onclick=async()=>{
    if(!session.uid||!session.phrase)return setNotice('سجّل الدخول أولًا لتذكّر هذا الجهاز.');
    if(session.remembered){
@@ -643,10 +709,14 @@ function openSettings(){
 }
 E('financeSyncSettingsV19')?.addEventListener('click',openSettings);
 window.masareefiSyncV19={onPersist,openSettings,synchronize,stableStringify,classification,disconnect};
-window.addEventListener('online',()=>{if(session.uid&&session.active)schedule()});
+window.addEventListener('online',()=>{
+ if(session.uid&&session.active)schedule();
+ else if(!session.uid&&vaultMeta?.mode==='automatic')restoreAutomaticV22();
+});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&session.uid&&session.active)synchronize(false)});
 window.addEventListener('focus',()=>{if(session.uid&&session.active)synchronize(false)});
 window.addEventListener('pageshow',()=>{if(session.uid&&session.active)synchronize(false)});
 setInterval(()=>{if(session.uid&&session.active&&document.visibilityState==='visible')synchronize(false)},45000);
 summaryV20();
+setTimeout(()=>{startDeviceConnectionV22().catch(e=>setNotice('تعذرت قراءة إعدادات اتصال الجهاز: '+String(e.message||e)))},0);
 })();
