@@ -930,16 +930,30 @@ function editTransaction(which){
  const t=data.transactions.find(x=>String(x.id)===String(which));if(!t)return;
  const options=catOptions(t.type);
  if(!options.includes(t.category))options.push(t.category);
+ const logoSelected=merchantLogoByIdV17(t.merchantLogoV17)?t.merchantLogoV17:(t.merchantLogoV17==='none'?'none':'auto');
+ const currentLogo=resolveMerchantLogoV17(t);
  openModal('تعديل '+(t.type==='income'?'دخل':'مصروف'),`
   <form id="editTxForm">
    <div class="field"><label>النوع</label><select name="type"><option value="income" ${t.type==='income'?'selected':''}>دخل</option><option value="expense" ${t.type==='expense'?'selected':''}>مصروف</option></select></div>
    <div class="field"><label>المبلغ</label><input name="amount" type="number" min="0.01" step="0.01" required value="${safe(t.amount)}"></div>
    <div class="field"><label>التصنيف</label><select name="category">${options.map(c=>`<option value="${safe(c)}" ${c===t.category?'selected':''}>${safe(c)}</option>`).join('')}</select></div>
    <div class="field"><label>الوصف</label><input name="note" value="${safe(conciseMerchant(t.note)||t.note||'')}"></div>
+   ${t.type==='expense'? `<div class="field"><label>رمز الجهة / المتجر</label>
+     <select name="merchantLogoV17">
+       <option value="auto" ${logoSelected==='auto'?'selected':''}>تلقائي${currentLogo?' — '+safe(currentLogo.name):' — رمز التصنيف عند عدم التعرف'}</option>
+       <option value="none" ${logoSelected==='none'?'selected':''}>بدون شعار — رمز التصنيف</option>
+       ${merchantLogoCatalogV17.map(x=>`<option value="${safe(x.id)}" ${logoSelected===x.id?'selected':''}>${safe(x.name)}</option>`).join('')}
+     </select>
+     <div class="logo-inline-hint-v17">رموز محلية تحمل أسماء الجهات، وليست ملفات الشعارات الرسمية.</div>
+     <label class="logo-remember-v17"><input type="checkbox" name="rememberLogoV17"> تذكر اختياري لهذا الاسم مستقبلًا</label>
+   </div>` : ''}
    <div class="field"><label>التاريخ</label><input name="date" type="date" required value="${safe(t.date)}"></div>
    <div class="actions tx-edit-actions"><button class="btn" type="submit">حفظ التعديل</button>${t.type==='expense'?'<button class="btn secondary" type="button" data-receipt-open="'+safe(t.id)+'">📎 الفاتورة والضمان</button>':''}<button type="button" class="btn danger" id="editTxDelete">🗑 حذف العملية</button></div>
   </form>`);
  const form=el('editTxForm');
+ if(form.elements.merchantLogoV17)form.elements.merchantLogoV17.onchange=()=>{
+   if(form.elements.rememberLogoV17)form.elements.rememberLogoV17.checked=true;
+ };
  form.elements.type.onchange=()=>{
    const kinds=catOptions(form.elements.type.value);
    if(!kinds.includes(form.elements.category.value))kinds.unshift(form.elements.category.value);
@@ -952,6 +966,17 @@ function editTransaction(which){
   t.type=form.elements.type.value;t.amount=val;t.category=form.elements.category.value;
   t.categoryParent=t.category.split(' / ')[0];
   t.note=conciseMerchant(form.elements.note.value.trim())||form.elements.note.value.trim();t.date=form.elements.date.value;
+  if(form.elements.merchantLogoV17){
+    const selection=form.elements.merchantLogoV17.value;
+    if(selection==='auto')delete t.merchantLogoV17;
+    else if(selection==='none'||merchantLogoByIdV17(selection))t.merchantLogoV17=selection;
+    const key=merchantLogoKeyV17(t.note);
+    if(form.elements.rememberLogoV17?.checked&&key.length>=3&&key.length<=90){
+      const rules=merchantLogoRulesV17();
+      if(selection==='auto')delete rules[key];
+      else if(selection==='none'||merchantLogoByIdV17(selection))rules[key]=selection;
+    }
+  }
   closeModal();persist()
  };
  el('editTxDelete').onclick=()=>{
