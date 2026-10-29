@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "updated": "2026-10-29",
+  "note": "تُخزّن ملفات SVG المعتمدة محليًا في المستودع. التحميل الخارجي اختياري ولا يتم إلا من عناوين محددة وموثوقة مسبقًا.",
+  "brands": [
+    {
+      "id": "stc",
+      "file": "stc.svg",
+      "source": "https://github.com/glincker/thesvg/blob/main/public/icons/stc/default.svg",
+      "kind": "catalog",
+      "license": "MIT / Brand trademark"
+    },
+    {
+      "id": "amazon",
+      "file": "amazon.svg",
+      "source": "https://github.com/glincker/thesvg/blob/main/public/icons/amazon/default.svg",
+      "kind": "catalog",
+      "license": "MIT / Brand trademark"
+    },
+    {
+      "id": "ejar",
+      "file": "ejar-local.svg",
+      "remote": "https://www.ejar.sa/sites/default/files/EjarLogo_10.png",
+      "source": "https://www.ejar.sa/",
+      "kind": "local-identifier",
+      "license": "Original local fallback mark; external official image is optional"
+    }
+  ]
+}
