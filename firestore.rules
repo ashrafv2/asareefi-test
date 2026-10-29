@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    match /users/{userId}/sync/{documentId} {
+      allow get: if owner(userId) && documentId == 'meta';
+      allow list, delete: if false;
+      allow create, update: if owner(userId) && documentId == 'meta'
+        && request.resource.data.keys().hasOnly([
+          'revision','hash','salt','iv','parts','format','size','updatedAt'
+        ])
+        && request.resource.data.revision is string
+        && request.resource.data.hash is string
+        && request.resource.data.salt is string
+        && request.resource.data.iv is string
+        && request.resource.data.parts is int
+        && request.resource.data.parts >= 1
+        && request.resource.data.parts <= 32
+        && request.resource.data.format == 1
+        && request.resource.data.size is int
+        && request.resource.data.size <= 8388608;
+    }
+    match /users/{userId}/sync_chunks/{chunkId} {
+      allow get: if owner(userId);
+      allow list, update, delete: if false;
+      allow create: if owner(userId)
+        && request.resource.data.keys().hasOnly(['revision','part','payload'])
+        && request.resource.data.revision is string
+        && request.resource.data.part is int
+        && request.resource.data.part >= 0
+        && request.resource.data.part < 32
+        && request.resource.data.payload is string
+        && request.resource.data.payload.size() <= 380000;
+    }
+  }
+}
