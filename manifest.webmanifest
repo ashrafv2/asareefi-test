@@ -1,5 +1,5 @@
 {
-  "name": "مصاريفي 2.0",
+  "name": "مصاريفي 2.0 | إدارة أموالك",
   "short_name": "مصاريفي",
   "start_url": "./",
   "display": "standalone",
@@ -20,5 +20,6 @@
   "description": "إدارة الدخل والمصروفات والادخار والمستحقات",
   "scope": "./",
   "background_color": "#f3f5f3",
-  "theme_color": "#087e5b"
+  "theme_color": "#087e5b",
+  "id": "./"
 }
