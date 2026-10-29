@@ -180,8 +180,15 @@ async function signIn(projectId,apiKey,email,password,phrase,rememberDevice=fals
  session.phrase=phrase;
  session.base=readBase();
  session.active=!!session.base?.hash;
- session.remembered=!!rememberDevice;
+ session.remembered=false;
  saveConfig();
+ try{await validateCloudPassphrase()}
+ catch(e){
+  session.uid='';session.idToken='';session.refreshToken='';session.phrase='';
+  session.active=false;session.base=null;
+  throw e;
+ }
+ session.remembered=!!rememberDevice;
  let failedToRemember=false;
  if(session.remembered){
   try{await saveSessionLock()}catch(_){clearLock();failedToRemember=true}
@@ -307,6 +314,19 @@ async function readSnapshot(manifest){
    !Array.isArray(parsed.savings)||!Array.isArray(parsed.receivables))throw Error('نسخة البيانات السحابية غير صالحة.');
  return parsed;
 }
+async function validateCloudPassphrase(){
+ // Verify the phrase can authenticate and decrypt the existing cloud snapshot.
+ // Never change local/cloud records in this check.
+ const manifest=await readManifest();
+ if(!manifest)return;
+ try{await readSnapshot(manifest)}
+ catch(e){
+  if(e?.name==='OperationError'||/decrypt|decrypting|operation-specific/i.test(String(e?.message||'')))
+   throw Error('عبارة التشفير لا تطابق السجلات المشفرة في Firebase. استخدم نفس العبارة السابقة؛ لم نغيّر أي بيانات.');
+  throw e;
+ }
+}
+
 async function adoptRemote(manifest,auto=false){
  if(auto&&selectedUI()){setNotice('توجد نسخة سحابية جديدة؛ سيتم استلامها عند إغلاق محرر العملية أو الضغط على «مزامنة الآن».');return}
  const originalHash=await currentHash();
