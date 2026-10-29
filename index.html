@@ -351,8 +351,8 @@ body.entry-v13-open{overflow:hidden}
 <div class="card" style="margin-top:12px"><div class="field"><label for="receiptSearch">البحث عن متجر أو تصنيف أو عملية</label><input id="receiptSearch" type="search" placeholder="بحث في الفواتير"></div><div id="receiptArchive"><div class="empty">لم تُرفق فواتير بعد.</div></div></div></section>
 <section class="page" id="p-backup"><div class="screenhead"><h2>النسخ الاحتياطي</h2></div>
 <div class="card release-gate-v15">
-  <strong class="gate-title-v15">فحص سلامة البيانات قبل الإطلاق</strong>
-  <p class="gate-intro-v15">يفحص وجود سجلات النسخة القديمة والتجريبية، واتساق الحسابات والمرفقات، وتجربة ترميز ملف فاتورة. لا يغيّر أي بيانات أو أرصدة.</p>
+  <strong class="gate-title-v15">فحص سلامة البيانات</strong>
+  <p class="gate-intro-v15">يفحص سجلات النسخ المحفوظة، بما فيها النسخ القديمة، واتساق الحسابات والمرفقات، وتجربة ترميز ملف فاتورة. لا يغيّر أي بيانات أو أرصدة.</p>
   <div class="actions"><button type="button" class="btn" id="releasePreflightV15">تشغيل الفحص</button><button type="button" class="btn outline" id="downloadLegacyV15">حفظ نسخة من بيانات الإصدار القديم</button></div>
   <div id="releasePreflightResultV15" class="gate-results-v15" role="status" aria-live="polite">لم يُشغّل الفحص بعد. احفظ نسخة احتياطية شاملة أولًا.</div>
   <p class="footnote">نجاح الفحص الأولي لا يغني عن اختبار تنزيل JSON الشامل ثم استعادته على جهاز أو متصفح منفصل.</p>
@@ -1032,42 +1032,7 @@ document.querySelectorAll('#featureAccess [data-feature]').forEach(button=>{
  });
 });
 </script>
-<script id="isolated-review-data-transfer">
-(function(){
-  const button=document.getElementById('copyOldDataToReview');
-  if(!button)return;
-  button.addEventListener('click',function(){
-    const legacy=['masareefi_v2','masareefi_v1'];
-    let found=null;
-    for(const key of legacy){
-      try{
-        const raw=localStorage.getItem(key);
-        if(!raw)continue;
-        const parsed=JSON.parse(raw);
-        if(parsed && typeof parsed==='object' && Array.isArray(parsed.transactions)){found=parsed;break}
-      }catch(e){}
-    }
-    if(!found){
-      alert('لم أعثر على بيانات الإصدار السابق في مساحة التخزين الحالية. يمكن استرجاع نسخة JSON محفوظة من صفحة النسخ الاحتياطي.');
-      return;
-    }
-    const hasCurrent= ['transactions','goals','debts','savings','receivables','recurringIncome'].some(k=>Array.isArray(data[k])&&data[k].length>0);
-    if(hasCurrent){
-      alert('لحماية سجلاتك الحالية، أوقفنا استبدال بيانات هذه النسخة مباشرة. استخدم «حفظ نسخة من بيانات الإصدار القديم» و«مشاركة النسخة» قبل أي استعادة يدوية؛ لن نحذف بياناتك الحالية.');
-      return;
-    }
-    if(!confirm('وجدت بيانات قديمة، والنسخة الحالية لا تحتوي على سجلات. سيُنسخ الأصل دون حذفه. تأكد من الاحتفاظ بنسخة احتياطية قبل المتابعة.'))return;
-    try{
-      data=hydrate(found);
-      persist();
-      alert('تم نسخ البيانات إلى نسخة المراجعة. لم تتغير بيانات التطبيق السابق.');
-    }catch(e){alert('تعذر نسخ البيانات. استخدم استرجاع ملف JSON بدلًا من ذلك.')}
-  });
-})();
-</script><style id="review-version-visibility">
-#reviewIndicator{position:relative;z-index:15}
-@media(max-width:700px){#reviewIndicator{font-size:11px;padding:9px 8px;line-height:1.5}}
-</style><style id="receipt-archive-style">
+<style id="receipt-archive-style">
 .receipt-list{display:grid;gap:10px;margin-top:12px}.receipt-row{display:flex;align-items:center;gap:10px;border:1px solid #dbe5d7;border-radius:14px;padding:12px;flex-wrap:wrap}.receipt-row>div:first-child{flex:1;min-width:150px}.receipt-row small{display:block;color:#65705e;line-height:1.8;font-size:12px}.receipt-actions{display:flex;gap:7px;flex-wrap:wrap}.receipt-actions button{min-height:38px;font-size:12px;padding:8px 10px}.receipt-warranty{color:#317d37;font-size:12px;font-weight:700}.receipt-expired{color:#b14237}.receipt-form-input{width:100%;max-width:100%;min-height:45px;box-sizing:border-box;font:inherit}.receipt-file-hint{font-size:12px;color:#687567;line-height:1.7}.receipt-selected{font-size:13px;color:#235b2d;overflow-wrap:anywhere}
 @media(max-width:650px){.txrow{flex-wrap:wrap}.txrow .rowmain{min-width:130px}.txrow [data-receipt-open]{min-height:36px;padding:4px 7px!important;font-size:12px}.receipt-row{align-items:flex-start}.receipt-actions{width:100%}.receipt-actions button{flex:1}}
 </style><script id="receipt-archive-module">
