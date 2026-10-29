@@ -11,7 +11,7 @@ const MAX_PARTS=32;
 const ENC=new TextEncoder(),DEC=new TextDecoder();
 const E=id=>document.getElementById(id);
 const statusText=message=>{const node=E('syncStatusV19');if(node)node.textContent=message};
-const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,base:null,timer:null,notice:'لم يتم ربط الحساب السحابي بعد.'};
+const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,notice:'لم يتم ربط الحساب السحابي بعد.'};
 const savedConfig=readConfig();
 function readConfig(){
  try{const raw=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}');return raw&&typeof raw==='object'?raw:{}}catch(e){return {}}
@@ -228,8 +228,15 @@ async function readSnapshot(manifest){
 }
 async function adoptRemote(manifest,auto=false){
  if(auto&&selectedUI()){setNotice('توجد نسخة سحابية جديدة؛ سيتم استلامها عند إغلاق محرر العملية أو الضغط على «مزامنة الآن».');return}
+ const originalHash=await currentHash();
  const received=await readSnapshot(manifest);
- // An encrypted cloud snapshot contains only the financial JSON. Receipts remain in IndexedDB.
+ if(auto&&(selectedUI()||(await currentHash())!==originalHash)){
+  session.pending=true;
+  setNotice('تغيّرت بيانات هذا الجهاز أثناء تنزيل النسخة؛ أوقفنا الاستبدال لحمايتها.');
+  return;
+ }
+ // An encrypted cloud snapshot contains only financial JSON. Receipts remain in IndexedDB.
+ const oldData=data;
  session.applying=true;
  try{
   data=hydrate(received);
@@ -238,6 +245,10 @@ async function adoptRemote(manifest,auto=false){
   saveBase({hash:manifest.hash,revision:manifest.revision,updateTime:manifest.updateTime});
   session.active=true;
   setNotice('✓ تم تنزيل السجلات المالية المشفرة وتحديثها على هذا الجهاز. المرفقات تُنقل بالنسخة الاحتياطية اليدوية.');
+ }catch(e){
+  data=oldData;
+  try{render()}catch(_){}
+  throw e;
  }finally{session.applying=false}
 }
 async function uploadSnapshot(existing){
@@ -308,7 +319,11 @@ async function synchronize(force,choice=''){
   if(e.status===409||e.status===412){
    session.active=false;setNotice('⚠ تم تحديث السحابة من جهاز آخر أثناء الرفع؛ لم نكتب فوقه. راجع التعارض.');
   }else setNotice('تعذرت المزامنة: '+String(e.message||e).slice(0,170));
- }finally{session.busy=false;refreshStatus()}
+ }finally{
+  session.busy=false;
+  refreshStatus();
+  if(session.pending&&session.active){session.pending=false;schedule()}
+ }
 }
 function schedule(){
  if(!session.uid||!session.active||session.applying||session.busy)return;
@@ -316,11 +331,15 @@ function schedule(){
  setNotice('تغييرات محلية بانتظار الرفع الآمن…');
  session.timer=setTimeout(()=>{session.timer=null;synchronize(false)},2400);
 }
-function onPersist(){if(!session.applying)schedule()}
+function onPersist(){
+ if(session.applying)return;
+ if(session.busy){session.pending=true;return}
+ schedule();
+}
 function disconnect(){
  holdTimer();
  session.idToken='';session.refreshToken='';session.phrase='';session.uid='';
- session.active=false;session.base=null;session.busy=false;
+ session.active=false;session.base=null;session.busy=false;session.pending=false;
  setNotice('تم قطع اتصال المزامنة. لا تزال البيانات محفوظة على جهازك.');
 }
 function openSettings(){
