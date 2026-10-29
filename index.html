@@ -296,6 +296,15 @@ body.entry-v13-open{overflow:hidden}
 .logo-remote-label-v18 small{font-size:11px;color:var(--muted)}
 .logo-connect-v18 button{width:100%;margin:12px 0 5px;min-height:42px}
 .logo-connect-v18 .logo-inline-hint-v17{margin:5px 0 0}
+</style><style id="finance-sync-v19-style">
+.sync-state-v19{white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #d5e9dd;background:#f3faf5;border-radius:13px;padding:12px;font-size:13px;line-height:1.85;margin:12px 0;color:#204d35}
+#syncConnectedControlsV19 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:13px 0}
+#syncConnectedControlsV19 .actions .btn{min-height:45px;white-space:normal;padding:10px 7px;font-size:13px}
+#syncLoginFormV19 button[type=submit]{min-height:46px;width:100%;margin:12px 0}
+#syncLoginFormV19 input{font-size:16px!important;max-width:100%}
+#syncCurrentStatusV19{font-size:12px}
+#syncLoginPanelV19[hidden],#syncConnectedControlsV19[hidden]{display:none!important}
+@media(max-width:360px){#syncConnectedControlsV19 .actions{grid-template-columns:1fr}}
 </style></head><body><div class="shell">
 <header class="head v12-head">
   <div class="headtop v12-top">
@@ -389,10 +398,10 @@ body.entry-v13-open{overflow:hidden}
  <div class="card" id="recurringList"></div>
  <div class="notice">يُسجّل الدخل المتكرر في تاريخ استحقاقه عند فتح التطبيق في ذلك اليوم أو بعده. لن تُنشأ العملية مرتين للشهر نفسه.</div>
 </section>
-<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 18 — شعارات محلية مع تحميل اختياري</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button><button class="settingsitem" id="merchantLogosSettingsV17" type="button">🏷️ شعارات المتاجر والجهات <span>‹</span></button>
+<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 19 — المزامنة المالية المشفرة</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button><button class="settingsitem" id="merchantLogosSettingsV17" type="button">🏷️ شعارات المتاجر والجهات <span>‹</span></button>
 <button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
 <button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button><button class="settingsitem" id="shortcutHelpV16" type="button">📩 ربط رسائل البنك باختصارات الآيفون <span>‹</span></button>
-<button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
+<button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" id="financeSyncSettingsV19" type="button">☁ المزامنة المالية بين الأجهزة <span>‹</span></button><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
 <section class="page" id="p-receipts"><div class="screenhead"><h2>أرشيف الفواتير</h2></div>
 <div class="notice">تُحفظ المرفقات محليًا في المتصفح. احفظ نسخة احتياطية شاملة على Drive أو iCloud لحماية الصور والملفات.</div>
 <div class="card" style="margin-top:12px"><div class="field"><label for="receiptSearch">البحث عن متجر أو تصنيف أو عملية</label><input id="receiptSearch" type="search" placeholder="بحث في الفواتير"></div><div id="receiptArchive"><div class="empty">لم تُرفق فواتير بعد.</div></div></div></section>
@@ -484,7 +493,7 @@ let data=readStorage(),page='home',filter='all',quickType='expense',categoryType
 const el=id=>document.getElementById(id),txt=(id,v)=>{if(el(id))el(id).textContent=v},today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')},money=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:2})+' ر.س',amt=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:2}),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let month=today().slice(0,7);el('month').value=month;
 const id=()=>String(Date.now())+'-'+Math.random().toString(36).slice(2,9),n=v=>Number(v)||0;
-function persist(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function persist(){localStorage.setItem(KEY,JSON.stringify(data));render();window.masareefiSyncV19?.onPersist?.()}
 // Display transactions by their transaction date (newest first), not when entered.
 // Sort only the filtered copy; never reorder stored records or rewrite dates.
 function monthTransactions(){
@@ -2118,4 +2127,4 @@ function entryKeyLogicV13(current,key){
     .catch(()=>{ /* Network-first app remains functional without service worker. */ }),{once:true});
  }
 })();
-</script></body></html>
+</script><script src="./cloud-sync.js?v=19" defer></script></body></html>
