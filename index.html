@@ -249,6 +249,36 @@ body.entry-v13-open{overflow:hidden}
 .release-gate-v15 .actions{margin:8px 0;display:flex;gap:8px;flex-wrap:wrap}
 .release-gate-v15 .actions .btn{flex:1 1 145px;white-space:normal;text-align:center}
 .gate-results-v15{font-size:12px;line-height:1.9;background:#f1f7f3;border-radius:13px;padding:12px;color:#294b38;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px}
+</style><style id="merchant-logos-style-v17">
+/* Compact offline marks. No image requests, transaction data or merchant names leave the device. */
+.circle.merchant-circle-v17, #p-home .v12-transaction-card .circle.merchant-circle-v17{
+ background:transparent!important;color:inherit!important;padding:0!important;
+}
+.merchant-logo-v17{
+ --ml-fg:#087e5b;--ml-bg:#eff5f1;
+ width:43px;height:43px;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;box-sizing:border-box;gap:0;
+ border-radius:13px;background:var(--ml-bg);color:var(--ml-fg);
+ border:1px solid color-mix(in srgb,var(--ml-fg) 14%, transparent);
+ overflow:hidden;line-height:1.05;
+}
+.merchant-logo-v17 svg{display:block!important;width:21px!important;height:16px!important;flex:0 0 auto}
+.merchant-logo-letters-v17{font-size:clamp(8px,2.45vw,11px);font-weight:900;letter-spacing:-.25px;white-space:nowrap;max-width:95%;overflow:hidden;text-overflow:clip}
+.merchant-logo-v17:not(:has(svg)) .merchant-logo-letters-v17{font-size:clamp(10px,2.6vw,12px)}
+#p-home .v12-transaction-card .merchant-logo-v17{width:43px;height:43px}
+#p-home .v12-transaction-card .merchant-logo-v17 svg{width:21px!important;height:16px!important}
+.logo-gallery-v17{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.logo-gallery-item-v17{display:flex;align-items:center;gap:8px;min-width:0;background:var(--theme-soft-2,#f7faf7);border:1px solid var(--line);border-radius:12px;padding:8px}
+.logo-gallery-item-v17 .merchant-logo-v17{flex:0 0 42px}
+.logo-gallery-item-v17 span:last-child{font-size:11px;overflow-wrap:anywhere;min-width:0}
+.logo-list-v17{display:grid;gap:6px}
+.logo-list-row-v17{display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 2px}
+.logo-list-row-v17 .logo-names{flex:1;min-width:0;font-size:12px;overflow-wrap:anywhere}
+.logo-list-row-v17 button{font-size:12px;color:#a72c2c;background:#fff5f4;border:1px solid #f4c9c5;border-radius:9px;padding:8px;min-height:35px}
+.logo-remember-v17{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);margin:8px 0}
+.logo-remember-v17 input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--green)}
+.logo-inline-hint-v17{font-size:11px;line-height:1.6;color:var(--muted);margin-top:6px}
+@media(max-width:410px){.logo-gallery-v17{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><div class="shell">
 <header class="head v12-head">
   <div class="headtop v12-top">
@@ -342,7 +372,7 @@ body.entry-v13-open{overflow:hidden}
  <div class="card" id="recurringList"></div>
  <div class="notice">يُسجّل الدخل المتكرر في تاريخ استحقاقه عند فتح التطبيق في ذلك اليوم أو بعده. لن تُنشأ العملية مرتين للشهر نفسه.</div>
 </section>
-<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 16 — اختصارات الرسائل البنكية</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button>
+<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 17 — شعارات المتاجر والجهات</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button><button class="settingsitem" id="merchantLogosSettingsV17" type="button">🏷️ شعارات المتاجر والجهات <span>‹</span></button>
 <button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
 <button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button><button class="settingsitem" id="shortcutHelpV16" type="button">📩 ربط رسائل البنك باختصارات الآيفون <span>‹</span></button>
 <button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
@@ -430,8 +460,8 @@ body.entry-v13-open{overflow:hidden}
 'use strict';
 const KEY='masareefi_v2_review_20261028_isolated',types=['income','expense'];
 const defaultCategories={income:['راتب','عمل إضافي','هدية','مكافأة','استرداد','أخرى'],expense:['غذاء ومقاضي','السكن والفواتير','النقل والسيارة','الصحة','التعليم','التسوق','ترفيه','أقساط وديون','أخرى']};
-const fresh=()=>({transactions:[],goals:[],debts:[],budgets:{},savings:[],receivables:[],savingAccounts:[{id:'bank',name:'حساب بنكي',type:'bank'},{id:'cash',name:'كاش',type:'cash'}],customCategories:{income:[],expense:[]},hiddenCategories:{income:[],expense:[]},categoryTree:null,themeColor:'#66c92e',recurringIncome:[]});
-function hydrate(raw){const clean=raw&&typeof raw==='object'&&!Array.isArray(raw)?{...raw}:{};delete clean._receiptBackup;let d={...fresh(),...clean};for(const name of ['transactions','goals','debts','savings','receivables'])if(!Array.isArray(d[name]))d[name]=[];if(!d.budgets||typeof d.budgets!=='object')d.budgets={};if(!Array.isArray(d.savingAccounts)||!d.savingAccounts.length)d.savingAccounts=fresh().savingAccounts;if(!Array.isArray(d.recurringIncome))d.recurringIncome=[];if(typeof d.themeColor!=='string')d.themeColor='#66c92e';for(const group of ['customCategories','hiddenCategories']){if(!d[group]||typeof d[group]!=='object')d[group]={};for(const type of types)if(!Array.isArray(d[group][type]))d[group][type]=[]}return d}
+const fresh=()=>({transactions:[],goals:[],debts:[],budgets:{},savings:[],receivables:[],savingAccounts:[{id:'bank',name:'حساب بنكي',type:'bank'},{id:'cash',name:'كاش',type:'cash'}],customCategories:{income:[],expense:[]},hiddenCategories:{income:[],expense:[]},categoryTree:null,themeColor:'#66c92e',recurringIncome:[],merchantLogoRulesV17:{}});
+function hydrate(raw){const clean=raw&&typeof raw==='object'&&!Array.isArray(raw)?{...raw}:{};delete clean._receiptBackup;let d={...fresh(),...clean};for(const name of ['transactions','goals','debts','savings','receivables'])if(!Array.isArray(d[name]))d[name]=[];if(!d.budgets||typeof d.budgets!=='object')d.budgets={};if(!Array.isArray(d.savingAccounts)||!d.savingAccounts.length)d.savingAccounts=fresh().savingAccounts;if(!Array.isArray(d.recurringIncome))d.recurringIncome=[];if(!d.merchantLogoRulesV17||typeof d.merchantLogoRulesV17!=='object'||Array.isArray(d.merchantLogoRulesV17))d.merchantLogoRulesV17={};if(typeof d.themeColor!=='string')d.themeColor='#66c92e';for(const group of ['customCategories','hiddenCategories']){if(!d[group]||typeof d[group]!=='object')d[group]={};for(const type of types)if(!Array.isArray(d[group][type]))d[group][type]=[]}return d}
 function readStorage(){try{return hydrate(JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return hydrate({})}}
 let data=readStorage(),page='home',filter='all',quickType='expense',categoryType='expense';
 const el=id=>document.getElementById(id),txt=(id,v)=>{if(el(id))el(id).textContent=v},today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')},money=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:2})+' ر.س',amt=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:2}),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -523,6 +553,97 @@ function conciseMerchant(note){
  return merchant.length>=2?merchant.slice(0,90):null;
 }
 
+
+/* v17: Offline merchant identification marks. These are compact, locally rendered
+   identification badges, not downloaded official trademark artwork. */
+const merchantLogoCatalogV17=[
+ {id:'ejar',name:'منصة إيجار',mark:'إيجار',accent:'#007861',background:'#e4f8f1',kind:'ejar',
+  aliases:['منصة إيجار','شبكة إيجار','ejar','ejar sa','ejar platform','ejar payment'],branch:false},
+ {id:'aldawaa',name:'صيدليات الدواء',mark:'دواء',accent:'#188552',background:'#e6f7ed',kind:'medical',
+  aliases:['aldawaa','al dawaa','al dawaa p','صيدليات الدواء','al dawaa pharmacy'],branch:true},
+ {id:'boqsha',name:'BOQSHA',mark:'B',accent:'#a34c7e',background:'#f9eaf3',kind:'text',
+  aliases:['boqsha','بوقشة'],branch:true},
+ {id:'stc',name:'STC الاتصالات',mark:'stc',accent:'#6b3193',background:'#f1eaf8',kind:'text',
+  aliases:['stc','stc pay','saudi telecom','شركة الاتصالات السعودية'],branch:false},
+ {id:'mobily',name:'موبايلي',mark:'mobily',accent:'#1378aa',background:'#e7f3fa',kind:'text',
+  aliases:['mobily','موبايلي','etihad etisalat'],branch:false},
+ {id:'zain',name:'زين',mark:'زين',accent:'#552b7a',background:'#f1eaf6',kind:'text',
+  aliases:['zain ksa','zain','زين السعودية'],branch:false},
+ {id:'sec',name:'الشركة السعودية للكهرباء',mark:'كهرباء',accent:'#e7a11b',background:'#fff6df',kind:'energy',
+  aliases:['saudi electricity','saudi electricity company','الشركة السعودية للكهرباء','sec electricity'],branch:false},
+ {id:'nwc',name:'شركة المياه الوطنية',mark:'مياه',accent:'#087baf',background:'#e5f5fc',kind:'water',
+  aliases:['national water company','شركة المياه الوطنية','nwc water','nwc sa'],branch:false},
+ {id:'jarir',name:'مكتبة جرير',mark:'جرير',accent:'#ca2428',background:'#fff0ed',kind:'text',
+  aliases:['jarir','jarir bookstore','مكتبة جرير'],branch:true},
+ {id:'panda',name:'بنده',mark:'بنده',accent:'#186a4a',background:'#eaf7ee',kind:'text',
+  aliases:['panda supermarket','panda retail','بنده ماركت','أسواق بنده'],branch:false},
+ {id:'danube',name:'الدانوب',mark:'دانوب',accent:'#c43a62',background:'#fff0f4',kind:'text',
+  aliases:['danube','danube supermarket','أسواق الدانوب','الدانوب'],branch:true},
+ {id:'noon',name:'نون',mark:'noon',accent:'#211f25',background:'#fff4cc',kind:'text',
+  aliases:['noon','noon com','noon sa','نون دوت كوم'],branch:false},
+ {id:'amazon',name:'أمازون',mark:'amazon',accent:'#343d48',background:'#f2f5f6',kind:'text',
+  aliases:['amazon','amazon sa','amazon saudi','امازون السعودية'],branch:false},
+ {id:'sasco',name:'ساسكو',mark:'ساسكو',accent:'#19724b',background:'#e4f7ee',kind:'fuel',
+  aliases:['sasco','ساسكو','saudi automotive services'],branch:true},
+ {id:'alrajhi',name:'مصرف الراجحي',mark:'راجحي',accent:'#117fb7',background:'#e8f4fb',kind:'text',
+  aliases:['al rajhi','al rajhi bank','مصرف الراجحي','بنك الراجحي'],branch:false}
+];
+function merchantLogoKeyV17(value){
+ return String(value??'').normalize('NFKC').toLowerCase()
+  .replace(/[\u064b-\u065f\u0670]/g,'')
+  .replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+  .replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim();
+}
+function merchantLogoRulesV17(){
+ if(!data.merchantLogoRulesV17||typeof data.merchantLogoRulesV17!=='object'||Array.isArray(data.merchantLogoRulesV17))
+  data.merchantLogoRulesV17={};
+ return data.merchantLogoRulesV17;
+}
+function merchantLogoByIdV17(id){
+ return merchantLogoCatalogV17.find(x=>x.id===id)||null;
+}
+function resolveMerchantLogoV17(t){
+ if(!t||t.type!=='expense')return null;
+ if(t.merchantLogoV17==='none')return null;
+ const override=merchantLogoByIdV17(t.merchantLogoV17);
+ if(override)return override;
+ const note=conciseMerchant(t.note)||t.note||'';
+ const key=merchantLogoKeyV17(note);
+ if(!key)return null;
+ const rules=data.merchantLogoRulesV17;
+ if(rules&&typeof rules==='object'&&Object.prototype.hasOwnProperty.call(rules,key)){
+  if(rules[key]==='none')return null;
+  const matched=merchantLogoByIdV17(rules[key]);
+  if(matched)return matched;
+ }
+ for(const logo of merchantLogoCatalogV17){
+  for(const alias of logo.aliases){
+   const target=merchantLogoKeyV17(alias);
+   if(key===target)return logo;
+   // Merchant terminal/branch suffixes may follow a sufficiently distinctive alias.
+   if(logo.branch&&target.length>=5&&key.startsWith(target+' ')){
+    const suffix=key.slice(target.length+1);
+    if(suffix.length<=15&&/^[a-z0-9 ]+$/i.test(suffix))return logo;
+   }
+  }
+ }
+ return null;
+}
+function merchantLogoBadgeV17(logo){
+ if(!logo)return '';
+ let glyph='';
+ if(logo.kind==='ejar')glyph='<svg viewBox="0 0 32 18" aria-hidden="true"><path d="M2 4 L18 1 L13 5 L29 2 L24 7 L9 10 L4 8 Z" fill="#00a47c"/><path d="M6 12 L28 8 L23 13 L10 16 Z" fill="#2aabc0"/></svg>';
+ if(logo.kind==='medical')glyph='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="20" rx="1.5" fill="#149e6a"/><rect x="2" y="9" width="20" height="6" rx="1.5" fill="#149e6a"/></svg>';
+ if(logo.kind==='energy')glyph='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2 4 14h7l-1 8 10-13h-7l1-7Z" fill="#e0a11b"/></svg>';
+ if(logo.kind==='water')glyph='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C7 9 5 12 5 15a7 7 0 0 0 14 0c0-3-2-6-7-13Z" fill="#208bbd"/></svg>';
+ if(logo.kind==='fuel')glyph='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V7a3 3 0 0 1 3-3h7v17M5 11h10M3 21h14M15 9h2l3 4v6a2 2 0 0 1-4 0v-4" stroke="#19724b" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+ return '<span class="merchant-logo-v17" style="--ml-fg:'+logo.accent+';--ml-bg:'+logo.background+'" title="رمز '+safe(logo.name)+'">'+glyph+'<span class="merchant-logo-letters-v17">'+safe(logo.mark)+'</span></span>';
+}
+function merchantIconV17(t){
+ const logo=resolveMerchantLogoV17(t);
+ return logo?merchantLogoBadgeV17(logo):transactionIconV12(t.category);
+}
+
 function transactionIconV12(category){
  const label=String(category||'');
  if(/وقود|بنزين/.test(label)){
@@ -538,9 +659,10 @@ function txRows(list){
  return list.map(t=>{
   const note=conciseMerchant(t.note)||t.note||t.category||'عملية';
   const label=t.type==='expense'?'مصروف':'دخل';
+  const merchant=resolveMerchantLogoV17(t);
   return `<button type="button" class="txrow txrow-reliable tx-detail-trigger" data-action="editTx" data-id="${safe(t.id)}" aria-label="فتح تفاصيل ${label}: ${safe(note)}">
     <span class="tx-primary">
-      <span class="circle ${t.type==='expense'?'red':''}" aria-hidden="true">${transactionIconV12(t.category)}</span>
+      <span class="circle ${t.type==='expense'?'red':''} ${merchant?'merchant-circle-v17':''}" aria-hidden="true">${merchant?merchantLogoBadgeV17(merchant):transactionIconV12(t.category)}</span>
       <span class="rowmain"><b>${safe(note)}</b><small>${safe(t.category)} · ${safe(t.date)}</small></span>
       <strong class="value ${t.type==='expense'?'negative':'positive'}">${t.type==='expense'?'−':'+'}${amt(t.amount)}</strong>
       <span class="tx-detail-chevron" aria-hidden="true">‹</span>
