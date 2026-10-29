@@ -9,6 +9,7 @@
 const DB='masareefi_v22_device_vault', VERSION=1;
 const STORE='records', KEY_STORE='keys', CURRENT='current';
 const ENC=new TextEncoder(),DEC=new TextDecoder();
+let inMemoryPasskeyKey=null;
 const toB64=bytes=>{
  let str='';for(let i=0;i<bytes.length;i+=32768)str+=String.fromCharCode(...bytes.subarray(i,i+32768));
  return btoa(str);
@@ -56,6 +57,7 @@ async function putVault(record,key){
  })}finally{db.close()}
 }
 async function clear(){
+ inMemoryPasskeyKey=null;
  const db=await openDB();
  try{return await new Promise((resolve,reject)=>{
   const tx=db.transaction([STORE,KEY_STORE],'readwrite');
@@ -104,6 +106,7 @@ function rowFor(secrets,mode){
 }
 async function rememberAutomatic(secrets){
  const verified=verifySecrets(secrets);
+ inMemoryPasskeyKey=null;
  if(!available())throw Error('المتصفح لا يدعم حفظ اتصال مشفر.');
  const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
  const record=await seal(rowFor(verified,'automatic'),verified,key);
@@ -162,6 +165,7 @@ async function createPasskey(secrets){
  const key=await passkeyKey(output);
  const record=await seal({...rowFor(verified,'passkey'),credentialId:toB64(new Uint8Array(created.rawId)),salt:toB64(salt)},verified,key);
  await putVault(record,null);
+ inMemoryPasskeyKey=key;
  return true;
 }
 async function unlockPasskey(){
@@ -177,11 +181,27 @@ async function unlockPasskey(){
   throw Error('البصمة المستخدمة ليست البصمة المسجلة لهذا التطبيق.');
  const output=await passkeyOutput(credential);
  const key=await passkeyKey(output);
- try{return await unseal(record,key)}
- catch(_){throw Error('تعذر فك اتصال مصاريفي باستخدام بصمة الجهاز. استخدم تسجيل الدخول الكامل.')}
+ try{
+  const value=await unseal(record,key);
+  inMemoryPasskeyKey=key;
+  return value;
+ }catch(_){throw Error('تعذر فك اتصال مصاريفي باستخدام بصمة الجهاز. استخدم تسجيل الدخول الكامل.')}
+}
+async function updateCredentials(secrets){
+ const verified=verifySecrets(secrets),row=await getRecord(STORE,CURRENT);
+ if(!row)return false;
+ if(row.projectId!==verified.projectId||row.email!==verified.email||row.uid!==verified.uid)
+  throw Error('لا يمكن تحديث اتصال لحساب مختلف.');
+ let key;
+ if(row.mode==='automatic')key=await getRecord(KEY_STORE,'automatic');
+ else if(row.mode==='passkey')key=inMemoryPasskeyKey;
+ if(!key)return false;
+ const encrypted=await seal({...row},verified,key);
+ await putVault(encrypted,row.mode==='automatic'?key:null);
+ return true;
 }
 window.masareefiDeviceVaultV22={
- metadata,clear,rememberAutomatic,restoreAutomatic,createPasskey,unlockPasskey,
+ metadata,clear,rememberAutomatic,restoreAutomatic,createPasskey,unlockPasskey,updateCredentials,
  available,hasPasskeySupport
 };
 })();
