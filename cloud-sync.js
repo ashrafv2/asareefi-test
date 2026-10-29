@@ -207,7 +207,8 @@ function summaryV20(){
  box.dataset.syncState=session.uid?(session.active?'connected':'attention'):'offline';
  if(!session.uid){
    box.textContent=readConfig().email?
-     '⚠ المزامنة غير متصلة في هذه الجلسة. أعد تسجيل الدخول من «المزامنة المالية بين الأجهزة» قبل توقع انتقال أي تعديل. التغييرات تبقى محفوظة على الجهاز.':
+     '⚠ '+(session.notice.includes('تم حفظ التعديل على هذا الجهاز فقط')?'تم حفظ التعديل على هذا الجهاز فقط. ':'')+
+     'المزامنة غير متصلة في هذه الجلسة. أعد تسجيل الدخول من «المزامنة المالية بين الأجهزة» حتى تنتقل التعديلات.':
      '☁ لم تُفعّل المزامنة على هذا الجهاز بعد؛ العمليات تحفظ محليًا فقط.';
  }else if(!session.active){
    box.textContent='⚠ المزامنة متوقفة للمراجعة: '+session.notice;
