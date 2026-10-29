@@ -1,14 +1,14 @@
-/* Masareefi v21 test service worker.
+/* Masareefi v22 test service worker.
  * Network-first app shell prevents stale app versions. Logo assets cache offline.
  * Never reads or caches bank messages, financial records, or personal merchant data.
  */
 'use strict';
-const SHELL_CACHE='masareefi-test-shell-v21-20261029';
-const LOGO_CACHE='masareefi-test-logos-v19-20261029';
+const SHELL_CACHE='masareefi-test-shell-v22-20261029';
+const LOGO_CACHE='masareefi-test-logos-v22-20261029';
 const OLD_PREFIXES=['masareefi-test-shell-','masareefi-test-logos-'];
 const OFFICIAL_EJAR='https://www.ejar.sa/sites/default/files/EjarLogo_10.png';
 const CORE=[
- './index.html','./cloud-sync.js','./manifest.webmanifest','./logos/catalog.json',
+ './index.html','./device-vault.js','./cloud-sync.js','./manifest.webmanifest','./logos/catalog.json',
  './logos/stc.svg','./logos/amazon.svg','./logos/ejar-local.svg'
 ];
 self.addEventListener('install',event=>{
@@ -64,7 +64,7 @@ self.addEventListener('fetch',event=>{
   })());
   return;
  }
- if(relative==='logos/catalog.json'||relative==='manifest.webmanifest'||relative==='cloud-sync.js'){
+ if(relative==='logos/catalog.json'||relative==='manifest.webmanifest'||relative==='cloud-sync.js'||relative==='device-vault.js'){
   // Network first so a catalog update is visible without changing application code.
   event.respondWith((async()=>{
     const cache=await caches.open(SHELL_CACHE);
