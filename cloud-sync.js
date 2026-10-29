@@ -1,17 +1,18 @@
-/* Masareefi 2.0 — encrypted financial cloud sync (opt-in, Firebase REST).
+/* Masareefi 2.0 — v21 encrypted financial cloud sync (opt-in, Firebase REST).
  * Does NOT upload attachments, card messages, passwords, or credentials to GitHub.
  * Cloud transactions are encrypted with AES-GCM + PBKDF2 using a session-only phrase.
  */
 (function(){
 'use strict';
 const CONFIG_KEY='masareefi_finance_sync_v19';
+const LOCK_KEY='masareefi_finance_sync_v21_encrypted_unlock';
 const CHUNK_SIZE=380000;
 const MAX_DATA_BYTES=8*1024*1024;
 const MAX_PARTS=32;
 const ENC=new TextEncoder(),DEC=new TextDecoder();
 const E=id=>document.getElementById(id);
 const statusText=message=>{const node=E('syncStatusV19');if(node)node.textContent=message};
-const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,notice:'لم يتم ربط الحساب السحابي بعد.'};
+const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,remembered:false,showLoginForm:false,unlockBusy:false,notice:'لم يتم ربط الحساب السحابي بعد.'};
 const savedConfig=readConfig();
 function readConfig(){
  try{const raw=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}');return raw&&typeof raw==='object'?raw:{}}catch(e){return {}}
@@ -19,6 +20,48 @@ function readConfig(){
 function saveConfig(){
  localStorage.setItem(CONFIG_KEY,JSON.stringify({projectId:session.projectId,apiKey:session.apiKey,email:session.email}));
 }
+
+function readLock(){
+ try{
+  const x=JSON.parse(localStorage.getItem(LOCK_KEY)||'null');
+  return x&&x.version===1&&typeof x.projectId==='string'&&typeof x.email==='string'&&
+   typeof x.uid==='string'&&typeof x.salt==='string'&&typeof x.iv==='string'&&
+   typeof x.content==='string'&&x.content.length<10000?x:null;
+ }catch(_){return null}
+}
+function clearLock(){localStorage.removeItem(LOCK_KEY);session.remembered=false;}
+async function saveSessionLock(){
+ if(!session.remembered||!session.refreshToken||!session.phrase)return;
+ const raw=JSON.stringify({projectId:session.projectId,email:session.email,uid:session.uid,refreshToken:session.refreshToken});
+ const encrypted=await encryptSnapshot(raw,session.phrase);
+ localStorage.setItem(LOCK_KEY,JSON.stringify({version:1,projectId:session.projectId,
+  email:session.email,uid:session.uid,salt:encrypted.salt,iv:encrypted.iv,content:encrypted.content}));
+}
+async function unlockSession(phrase){
+ const lock=readLock(),config=readConfig();
+ if(!lock)throw Error('لا يوجد اتصال محفوظ على هذا الجهاز.');
+ if(phrase.length<12)throw Error('عبارة التشفير يجب ألا تقل عن 12 حرفًا.');
+ if(config.projectId!==lock.projectId||config.email!==lock.email||!config.apiKey)
+  throw Error('إعدادات Firebase تغيرت. سجّل الدخول الكامل من جديد.');
+ let saved;
+ try{saved=JSON.parse(await decryptSnapshot(lock.content,phrase,lock.salt,lock.iv))}
+ catch(_){throw Error('عبارة التشفير غير مطابقة أو بيانات الاتصال تالفة. يمكنك استخدام تسجيل الدخول الكامل.')}
+ if(!saved||saved.projectId!==lock.projectId||saved.email!==lock.email||
+    saved.uid!==lock.uid||typeof saved.refreshToken!=='string'||saved.refreshToken.length<20)
+  throw Error('بيانات الاتصال المحفوظة غير صالحة. استخدم تسجيل الدخول الكامل.');
+ session.projectId=lock.projectId;session.apiKey=config.apiKey;session.email=lock.email;
+ session.uid=lock.uid;session.idToken='';session.refreshToken=saved.refreshToken;
+ session.expiry=0;session.phrase=phrase;session.remembered=true;
+ session.base=readBase();session.active=!!session.base?.hash;
+ try{await authToken()}
+ catch(e){
+  session.uid='';session.idToken='';session.refreshToken='';session.phrase='';session.active=false;
+  throw Error('تعذّر تجديد الجلسة. استخدم تسجيل الدخول الكامل: '+String(e.message||e));
+ }
+ setNotice('جارٍ مقارنة النسختين بعد فتح الاتصال المحفوظ…');
+ await synchronize(false);
+}
+
 function saveBase(value){
  if(!session.uid)return;
  localStorage.setItem(CONFIG_KEY+'_baseline_'+session.projectId+'_'+session.uid,JSON.stringify(value));
