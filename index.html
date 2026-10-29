@@ -985,6 +985,47 @@ function editTransaction(which){
   closeModal();persist()
  };
 }
+
+function manageMerchantLogosV17(){
+ const rules=merchantLogoRulesV17();
+ const options=merchantLogoCatalogV17.map(c=>'<option value="'+safe(c.id)+'">'+safe(c.name)+'</option>').join('');
+ const gallery=merchantLogoCatalogV17.map(c=>'<div class="logo-gallery-item-v17">'+merchantLogoBadgeV17(c)+'<span>'+safe(c.name)+'</span></div>').join('');
+ const list=Object.entries(rules).filter(([k,v])=>k&&(v==='none'||merchantLogoByIdV17(v)));
+ const saved=list.length?list.map(([key,val])=>'<div class="logo-list-row-v17">'+
+  '<span class="logo-names"><b>'+safe(key)+'</b> ← '+(val==='none'?'رمز التصنيف':safe(merchantLogoByIdV17(val)?.name||''))+'</span>'+
+  '<button type="button" data-logo-rule-delete-v17="'+safe(key)+'">إزالة</button></div>').join(''):
+  '<p class="footnote">لم تضف ربطًا يدويًا بعد. يمكنك أيضًا اختيار الرمز عند تعديل أي مصروف وتفعيل «تذكر اختياري».</p>';
+ const html='<p class="footnote">عند التعرف على اسم المتجر بوضوح سيظهر رمز الجهة، وإلا يظهر رمز التصنيف. لا تُرسل بياناتك إلى الإنترنت. الرموز محلية للتعريف وليست صور الشعارات الرسمية.</p>'+
+  '<h3 style="margin:13px 0 7px">الجهات المتاحة</h3><div class="logo-gallery-v17">'+gallery+'</div>'+
+  '<h3 style="margin:17px 0 8px">تعليم اسم متجر جديد</h3>'+
+  '<form id="merchantLogoRulesFormV17">'+
+    '<div class="field"><label>اسم المتجر كما يظهر في وصف العملية</label>'+
+      '<input name="merchant" type="text" required maxlength="90" autocomplete="off" placeholder="مثال: JOZ ALTEE"></div>'+
+    '<div class="field"><label>الرمز المطلوب</label><select name="logo" required>'+
+      '<option value="">اختر الرمز</option><option value="none">بدون شعار — رمز التصنيف</option>'+options+'</select></div>'+
+    '<button class="btn" type="submit">حفظ الربط</button></form>'+
+  '<h3 style="margin:17px 0 8px">اختياراتي المحفوظة ('+list.length+')</h3>'+
+  '<div class="logo-list-v17">'+saved+'</div>';
+ openModal('شعارات المتاجر والجهات',html,function(){
+  const form=el('merchantLogoRulesFormV17');
+  form.onsubmit=function(event){
+   event.preventDefault();
+   const name=merchantLogoKeyV17(form.elements.merchant.value);
+   const choice=form.elements.logo.value;
+   if(name.length<3||name.length>90){alert('اكتب اسم متجر من 3 حروف على الأقل، ولا تكتب تفاصيل حسابك البنكي.');return}
+   if(choice!=='none'&&!merchantLogoByIdV17(choice)){alert('اختر رمزًا من القائمة.');return}
+   merchantLogoRulesV17()[name]=choice;
+   persist();manageMerchantLogosV17();
+  };
+  el('modalBody').querySelectorAll('[data-logo-rule-delete-v17]').forEach(button=>{
+   button.onclick=function(){
+    delete merchantLogoRulesV17()[button.dataset.logoRuleDeleteV17];
+    persist();manageMerchantLogosV17();
+   };
+  });
+ });
+}
+
 function themePicker(){
  const colors=['#66c92e','#50ae37','#0a9967','#078454','#39bdf3','#2968b3','#1c408a','#ff9918','#df8410','#e7d500','#bbaa12','#ef5daa','#d04f98','#c63d92','#a72d7e','#985acf','#8546b7','#716ee9','#665ed5','#60c5bf','#54a8a3','#a9aaa4','#878d87','#333d4a'];
  openModal('لون التطبيق',`<p class="footnote">اختر لون الواجهة. سيتم حفظه في النسخة الاحتياطية.</p><div class="swatches">${colors.map(c=>`<button type="button" class="swatch ${data.themeColor===c?'selected':''}" data-theme-pick="${c}" aria-label="اختيار اللون ${c}" style="background:${c}"></button>`).join('')}</div>`);
@@ -1123,7 +1164,8 @@ function initExtra(){
  });
 }
 document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go){goto(go.dataset.go);return}const action=e.target.closest('[data-action]');if(action){act(action.dataset.action,action.dataset.id);return}const filterEl=e.target.closest('[data-filter]');if(filterEl){filter=filterEl.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===filterEl));render();return}const open=e.target.closest('[data-open-entry]');if(open){goto('home');setQuickType(open.dataset.openEntry);el('quickEntry').dataset.expanded='yes';el('quickEntry').classList.add('show');el('entryLauncher').setAttribute('aria-expanded','true');el('quickAmount').focus()}});
-el('monthPrev').onclick=()=>changeMonth(-1);el('monthNext').onclick=()=>changeMonth(1);el('month').onchange=e=>{month=e.target.value||today().slice(0,7);render()};el('quickExpense').onclick=()=>setQuickType('expense');el('quickIncome').onclick=()=>setQuickType('income');el('quickNewCategory').onclick=manageCategories;el('quickSave').onclick=addTx;el('quickNote').onkeydown=e=>{if(e.key==='Enter')addTx()};el('addAccountBtn').onclick=()=>manageAccounts('create');el('depositBtn').onclick=()=>savingAction('deposit');el('withdrawBtn').onclick=()=>savingAction('withdrawal');el('transferBtn').onclick=()=>savingAction('transfer');el('addReceivableBtn').onclick=()=>formNew('receivable');el('addGoalBtn').onclick=()=>formNew('goal');el('addDebtBtn').onclick=()=>formNew('debt');el('manageCategories').onclick=manageCategories;el('modalClose').onclick=closeModal;el('modal').addEventListener('click',e=>{if(e.target===el('modal'))closeModal()});el('setBudget').onclick=()=>{const amount=Number(el('budgetAmount').value);if(!requireAmount(amount)){alert('أدخل حدًا صحيحًا');return}data.budgets[el('budgetCategory').value]=amount;el('budgetAmount').value='';persist()};el('downloadBackup').onclick=()=>download(backupJSON(),backupName(),'application/json');el('shareBackup').onclick=shareBackup;el('exportCsv').onclick=exportCSV;el('restoreFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const raw=JSON.parse(await f.text());if(!raw||typeof raw!=='object'||!Array.isArray(raw.transactions))throw Error('invalid');if(confirm('استرجاع الملف سيستبدل جميع بياناتك الحالية. هل تريد المتابعة؟')){data=hydrate(raw);persist();setQuickType('expense');applyTheme();alert('تمت الاستعادة')}}catch(err){alert('تعذر فتح نسخة مصاريفي. تأكد من اختيار ملف JSON صحيح.')}e.target.value=''};
+el('monthPrev').onclick=()=>changeMonth(-1);el('monthNext').onclick=()=>changeMonth(1);el('month').onchange=e=>{month=e.target.value||today().slice(0,7);render()};el('quickExpense').onclick=()=>setQuickType('expense');el('quickIncome').onclick=()=>setQuickType('income');el('quickNewCategory').onclick=manageCategories;el('quickSave').onclick=addTx;el('quickNote').onkeydown=e=>{if(e.key==='Enter')addTx()};el('addAccountBtn').onclick=()=>manageAccounts('create');el('depositBtn').onclick=()=>savingAction('deposit');el('withdrawBtn').onclick=()=>savingAction('withdrawal');el('transferBtn').onclick=()=>savingAction('transfer');el('addReceivableBtn').onclick=()=>formNew('receivable');el('addGoalBtn').onclick=()=>formNew('goal');el('addDebtBtn').onclick=()=>formNew('debt');el('manageCategories').onclick=manageCategories;
+el('merchantLogosSettingsV17').onclick=manageMerchantLogosV17;el('modalClose').onclick=closeModal;el('modal').addEventListener('click',e=>{if(e.target===el('modal'))closeModal()});el('setBudget').onclick=()=>{const amount=Number(el('budgetAmount').value);if(!requireAmount(amount)){alert('أدخل حدًا صحيحًا');return}data.budgets[el('budgetCategory').value]=amount;el('budgetAmount').value='';persist()};el('downloadBackup').onclick=()=>download(backupJSON(),backupName(),'application/json');el('shareBackup').onclick=shareBackup;el('exportCsv').onclick=exportCSV;el('restoreFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const raw=JSON.parse(await f.text());if(!raw||typeof raw!=='object'||!Array.isArray(raw.transactions))throw Error('invalid');if(confirm('استرجاع الملف سيستبدل جميع بياناتك الحالية. هل تريد المتابعة؟')){data=hydrate(raw);persist();setQuickType('expense');applyTheme();alert('تمت الاستعادة')}}catch(err){alert('تعذر فتح نسخة مصاريفي. تأكد من اختيار ملف JSON صحيح.')}e.target.value=''};
 initExtra();setQuickType('expense');render();
 </script><style id="masareefi-all-elements-theme">
 /* Unified palette. Only semantic accent colors change; layout stays fixed. */
