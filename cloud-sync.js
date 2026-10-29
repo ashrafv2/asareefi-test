@@ -1,4 +1,4 @@
-/* Masareefi 2.0 — v21 encrypted financial cloud sync (opt-in, Firebase REST).
+/* Masareefi 2.0 — v22 encrypted financial sync and optional trusted-device restore.
  * Does NOT upload attachments, card messages, passwords, or credentials to GitHub.
  * Cloud transactions are encrypted with AES-GCM + PBKDF2 using a session-only phrase.
  */
@@ -6,13 +6,15 @@
 'use strict';
 const CONFIG_KEY='masareefi_finance_sync_v19';
 const LOCK_KEY='masareefi_finance_sync_v21_encrypted_unlock';
+const vault=()=>window.masareefiDeviceVaultV22||null;
+let vaultMeta=null;
 const CHUNK_SIZE=380000;
 const MAX_DATA_BYTES=8*1024*1024;
 const MAX_PARTS=32;
 const ENC=new TextEncoder(),DEC=new TextDecoder();
 const E=id=>document.getElementById(id);
 const statusText=message=>{const node=E('syncStatusV19');if(node)node.textContent=message};
-const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,remembered:false,showLoginForm:false,unlockBusy:false,notice:'لم يتم ربط الحساب السحابي بعد.'};
+const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,remembered:false,showLoginForm:false,unlockBusy:false,autoRestoring:false,deviceMode:'',notice:'لم يتم ربط الحساب السحابي بعد.'};
 const savedConfig=readConfig();
 function readConfig(){
  try{const raw=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}');return raw&&typeof raw==='object'?raw:{}}catch(e){return {}}
@@ -60,6 +62,70 @@ async function unlockSession(phrase){
  }
  setNotice('جارٍ مقارنة النسختين بعد فتح الاتصال المحفوظ…');
  await synchronize(false);
+}
+
+
+function sessionSecrets(){
+ return {projectId:session.projectId,email:session.email,uid:session.uid,
+  refreshToken:session.refreshToken,phrase:session.phrase};
+}
+async function readDeviceMeta(){
+ try{vaultMeta=await vault()?.metadata()||null}
+ catch(_){vaultMeta=null}
+ return vaultMeta;
+}
+async function restoreDeviceConnection(secrets,mode){
+ const settings=readConfig();
+ if(!secrets||settings.projectId!==secrets.projectId||settings.email!==secrets.email||!settings.apiKey)
+  throw Error('بيانات مشروع Firebase تغيرت. سجّل الدخول الكامل مرة واحدة لتحديث الاتصال.');
+ if(session.uid)return;
+ session.projectId=settings.projectId;session.apiKey=settings.apiKey;
+ session.email=secrets.email;session.uid=secrets.uid;session.refreshToken=secrets.refreshToken;
+ session.idToken='';session.expiry=0;session.phrase=secrets.phrase;
+ session.base=readBase();session.active=!!session.base?.hash;
+ session.deviceMode=mode||'';session.remembered=false;
+ try{
+  await authToken();
+  await validateCloudPassphrase();
+  await synchronize(false);
+ }catch(e){
+  session.uid='';session.idToken='';session.refreshToken='';session.phrase='';
+  session.base=null;session.active=false;session.deviceMode='';
+  throw e;
+ }
+}
+async function restoreAutomaticV22(){
+ if(session.uid||session.autoRestoring||vaultMeta?.mode!=='automatic')return;
+ if(!navigator.onLine){
+  setNotice('لا يوجد اتصال بالإنترنت. سيُعاد الاتصال تلقائيًا عند عودة الشبكة.');
+  return;
+ }
+ session.autoRestoring=true;
+ setNotice('جارٍ استعادة المزامنة تلقائيًا على هذا الجهاز…');
+ try{
+  const secrets=await vault().restoreAutomatic();
+  if(!secrets)throw Error('لم يُعثر على اتصال تلقائي محفوظ.');
+  await restoreDeviceConnection(secrets,'automatic');
+ }catch(e){
+  setNotice('⚠ تعذرت استعادة المزامنة تلقائيًا: '+String(e.message||e)+
+   ' يمكنك فتح المزامنة وتسجيل الدخول الكامل دون تغيير السجلات.');
+ }finally{session.autoRestoring=false;refreshStatus()}
+}
+async function startDeviceConnectionV22(){
+ await readDeviceMeta();
+ if(session.uid)return refreshStatus();
+ if(vaultMeta?.mode==='automatic')return restoreAutomaticV22();
+ if(vaultMeta?.mode==='passkey')setNotice('🔐 الاتصال محفوظ ببصمة الجهاز. افتح المزامنة واضغط «فتح ببصمة الجهاز / رمز القفل».');
+ else refreshStatus();
+}
+async function forgetDeviceV22(){
+ if(vaultMeta||session.deviceMode){
+  if(!vault())throw Error('ميزة تخزين الجهاز غير متاحة.');
+  await vault().clear();
+ }
+ vaultMeta=null;session.deviceMode='';
+ clearLock();
+ refreshStatus();
 }
 
 function saveBase(value){
@@ -157,7 +223,12 @@ async function authToken(){
  const rotated=!!answer.refresh_token&&answer.refresh_token!==session.refreshToken;
  session.refreshToken=answer.refresh_token||session.refreshToken;
  session.expiry=Date.now()+(Number(answer.expires_in)||3600)*1000;
- if(rotated&&session.remembered){
+ if(rotated&&session.deviceMode){
+  try{
+   const saved=await vault()?.updateCredentials(sessionSecrets());
+   if(!saved)throw Error('لم يكن مفتاح الجهاز متاحًا.');
+  }catch(_){setNotice('⚠ الاتصال الحالي يعمل لكن تعذر تحديث حفظ الجهاز. قد تحتاج إلى تسجيل الدخول الكامل عند التشغيل القادم.');}
+ }else if(rotated&&session.remembered){
   try{await saveSessionLock()}catch(_){clearLock()}
  }
  return session.idToken;
@@ -180,7 +251,7 @@ async function signIn(projectId,apiKey,email,password,phrase,rememberDevice=fals
  session.phrase=phrase;
  session.base=readBase();
  session.active=!!session.base?.hash;
- session.remembered=false;
+ session.remembered=false;session.deviceMode='';
  saveConfig();
  try{await validateCloudPassphrase()}
  catch(e){
@@ -188,6 +259,13 @@ async function signIn(projectId,apiKey,email,password,phrase,rememberDevice=fals
   session.active=false;session.base=null;
   throw e;
  }
+ // A full login replaces any device vault associated with another sign-in.
+ try{
+  const previous=await readDeviceMeta();
+  if(previous&&(previous.projectId!==projectId||previous.email!==email||previous.uid!==session.uid)){
+   await vault().clear();vaultMeta=null;
+  }
+ }catch(_){}
  session.remembered=!!rememberDevice;
  let failedToRemember=false;
  if(session.remembered){
