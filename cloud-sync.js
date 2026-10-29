@@ -433,6 +433,13 @@ function disconnect(){
 function openSettings(){
  const config=readConfig();
  const html='<p class="footnote">مزامنة مشفرة للعمليات والدخل والادخار والديون والتصنيفات بين أجهزتك، عبر Firebase خاص بك. <b>صور الفواتير وPDF لا تتزامن هنا</b> وتبقى ضمن النسخ الاحتياطية الشاملة.</p>'+
+  '<div id="syncUnlockPanelV21" hidden>'+
+   '<p class="footnote">هذا الجهاز يحفظ وسيلة اتصال مشفرة بعبارة التشفير، وليس كلمة مرور Firebase أو العبارة نفسها. أدخل العبارة لتفعيل المزامنة أثناء فتح التطبيق.</p>'+
+   '<form id="syncUnlockFormV21"><div class="field"><label>عبارة التشفير</label><input name="unlockPhrase" type="password" minlength="12" required autocomplete="off"></div>'+
+    '<button class="btn" type="submit">فتح الاتصال المشفر</button></form>'+
+   '<div class="actions"><button type="button" class="btn outline" id="syncShowFullLoginV21">تسجيل الدخول الكامل</button>'+
+    '<button type="button" class="btn outline" id="syncForgetDeviceV21">نسيان هذا الجهاز</button></div>'+
+  '</div>'+
   '<div id="syncLoginPanelV19">'+
    '<form id="syncLoginFormV19">'+
     '<div class="field"><label>معرّف مشروع Firebase</label><input name="projectId" dir="ltr" required autocomplete="off" value="'+safe(config.projectId||'')+'" placeholder="my-finance-project"></div>'+
@@ -440,22 +447,40 @@ function openSettings(){
     '<div class="field"><label>البريد الإلكتروني في Firebase Authentication</label><input name="email" type="email" required autocomplete="username" value="'+safe(config.email||'')+'"></div>'+
     '<div class="field"><label>كلمة مرور الحساب</label><input name="password" type="password" required autocomplete="current-password"></div>'+
     '<div class="field"><label>عبارة التشفير الخاصة بك (12 حرفًا على الأقل)</label><input name="phrase" type="password" minlength="12" required autocomplete="off" placeholder="استخدم نفس العبارة على كل أجهزتك"></div>'+
-    '<p class="footnote">لا تُرفع كلمة المرور أو عبارة التشفير إلى GitHub؛ تبقيان في ذاكرة هذه الجلسة فقط. فقدان عبارة التشفير يمنع قراءة النسخ السحابية القديمة.</p>'+
+    '<label class="field" style="display:flex;gap:10px;align-items:flex-start;line-height:1.8"><input type="checkbox" name="rememberDevice" style="flex:0 0 auto;margin-top:5px"><span>تذكّر هذا الجهاز باتصال مشفّر؛ سأدخل عبارة التشفير فقط عند إعادة فتح مصاريفي (اختياري).</span></label>'+
+    '<p class="footnote">لا تُرفع كلمات المرور أو عبارة التشفير إلى GitHub. خيار تذكّر الجهاز يحفظ رمز تجديد Firebase مشفرًا محليًا؛ فقدان عبارة التشفير يمنع قراءة النسخ السحابية القديمة.</p>'+
     '<button class="btn" type="submit">ربط حسابي السحابي</button>'+
    '</form></div>'+
   '<div id="syncConnectedControlsV19" hidden>'+
    '<p id="syncAccountLabelV19" class="footnote"></p>'+
+   '<p id="syncRememberedHintV21" class="footnote"></p>'+
    '<div class="actions"><button type="button" id="syncNowV19" class="btn">مزامنة الآن</button>'+
    '<button type="button" id="syncPushV19" class="btn secondary">رفع بيانات هذا الجهاز</button>'+
    '<button type="button" id="syncPullV19" class="btn outline">استلام البيانات من السحابة</button>'+
    '<button type="button" id="syncDisconnectV19" class="btn outline">قطع الاتصال</button></div>'+
-   '<p class="footnote">أثناء تشغيل التطبيق تُرفع تغييراتك تلقائيًا ويُفحص وجود تحديثات من جهاز آخر. لا تحدث مزامنة وهو مغلق تمامًا على الآيفون. عند وجود تعارض نوقف المزامنة ونسألك أي نسخة تحتفظ بها.</p>'+
+   '<p class="footnote">أثناء تشغيل التطبيق وبعد فتح الاتصال، تُرفع التغييرات تلقائيًا ويُفحص وجود تحديثات كل 45 ثانية تقريبًا أو عند العودة للتطبيق. لا تحدث مزامنة وهو مغلق تمامًا على الآيفون. عند وجود تعارض نوقف المزامنة ولا نستبدل أي نسخة تلقائيًا.</p>'+
    '<p class="footnote">قبل اختيار رفع أو استلام عند التعارض، احفظ <b>نسخة JSON شاملة مع المرفقات</b> من صفحة النسخ الاحتياطي.</p>'+
   '</div>'+
   '<p id="syncCurrentStatusV19" class="sync-state-v19" role="status"></p>'+
   '<p class="footnote"><a href="https://github.com/ashrafv2/asareefi-test/blob/main/FIREBASE_SYNC_SETUP_AR.md" target="_blank" rel="noopener noreferrer">دليل إنشاء مشروع Firebase وتفعيل قواعد الأمان</a></p>';
  openModal('المزامنة المالية المشفرة',html,function(){
+  session.showLoginForm=!readLock();
   refreshStatus();
+  E('syncShowFullLoginV21').onclick=()=>{session.showLoginForm=true;refreshStatus()};
+  E('syncForgetDeviceV21').onclick=()=>{
+   if(!confirm('سيتم حذف وسيلة الاتصال المشفرة المحفوظة محليًا فقط. لن تُحذف السجلات ولا بيانات Firebase. متابعة؟'))return;
+   clearLock();session.showLoginForm=true;
+   setNotice('تم نسيان الاتصال المحفوظ. يمكنك تسجيل الدخول من جديد.');
+  };
+  E('syncUnlockFormV21').onsubmit=async event=>{
+   event.preventDefault();
+   if(session.unlockBusy)return;
+   const frm=event.currentTarget,btn=frm.querySelector('button[type="submit"]');
+   session.unlockBusy=true;btn.disabled=true;setNotice('جارٍ فتح الاتصال المشفر…');
+   try{await unlockSession(frm.elements.unlockPhrase.value);frm.elements.unlockPhrase.value=''}
+   catch(e){setNotice('تعذر فتح الاتصال: '+String(e.message||e))}
+   finally{session.unlockBusy=false;btn.disabled=false;refreshStatus()}
+  };
   E('syncLoginFormV19').onsubmit=async event=>{
    event.preventDefault();
    const frm=event.currentTarget;
@@ -464,7 +489,7 @@ function openSettings(){
    setNotice('جارٍ ربط الحساب…');
    try{
     await signIn(frm.elements.projectId.value.trim(),frm.elements.apiKey.value.trim(),frm.elements.email.value.trim(),
-      frm.elements.password.value,frm.elements.phrase.value);
+      frm.elements.password.value,frm.elements.phrase.value,frm.elements.rememberDevice.checked);
     frm.elements.password.value='';frm.elements.phrase.value='';
    }catch(e){setNotice(String(e.message||e));}
    finally{submit.disabled=false;refreshStatus()}
@@ -486,6 +511,7 @@ window.masareefiSyncV19={onPersist,openSettings,synchronize,stableStringify,clas
 window.addEventListener('online',()=>{if(session.uid&&session.active)schedule()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&session.uid&&session.active)synchronize(false)});
 window.addEventListener('focus',()=>{if(session.uid&&session.active)synchronize(false)});
-setInterval(()=>{if(session.uid&&session.active&&document.visibilityState==='visible')synchronize(false)},90000);
+window.addEventListener('pageshow',()=>{if(session.uid&&session.active)synchronize(false)});
+setInterval(()=>{if(session.uid&&session.active&&document.visibilityState==='visible')synchronize(false)},45000);
 summaryV20();
 })();
