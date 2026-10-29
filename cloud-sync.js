@@ -259,14 +259,19 @@ async function signIn(projectId,apiKey,email,password,phrase,rememberDevice=fals
   session.active=false;session.base=null;
   throw e;
  }
- // A full login replaces any device vault associated with another sign-in.
+ // Preserve explicit trusted-device consent for the same Firebase account.
+ // Clear an old device token if the user changes to a different account.
  try{
   const previous=await readDeviceMeta();
   if(previous&&(previous.projectId!==projectId||previous.email!==email||previous.uid!==session.uid)){
    await vault().clear();vaultMeta=null;
+  }else if(previous?.mode==='automatic'){
+   await vault().rememberAutomatic(sessionSecrets());
+   session.deviceMode='automatic';
+   await readDeviceMeta();
   }
  }catch(_){}
- session.remembered=!!rememberDevice;
+ session.remembered=!!rememberDevice&&!session.deviceMode;
  let failedToRemember=false;
  if(session.remembered){
   try{await saveSessionLock()}catch(_){clearLock();failedToRemember=true}
@@ -602,7 +607,8 @@ function openSettings(){
   '<p id="syncCurrentStatusV19" class="sync-state-v19" role="status"></p>'+
   '<p class="footnote"><a href="https://github.com/ashrafv2/asareefi-test/blob/main/FIREBASE_SYNC_SETUP_AR.md" target="_blank" rel="noopener noreferrer">دليل إنشاء مشروع Firebase وتفعيل قواعد الأمان</a></p>';
  openModal('المزامنة المالية المشفرة',html,function(){
-  session.showLoginForm=!(readLock()||vaultMeta);
+  // Automatic mode must always offer full login if recovery cannot complete.
+  session.showLoginForm=!(readLock()||vaultMeta?.mode==='passkey');
   refreshStatus();
   E('syncShowFullLoginV21').onclick=()=>{session.showLoginForm=true;refreshStatus()};
   E('syncPasskeyFullLoginV22').onclick=()=>{session.showLoginForm=true;refreshStatus()};
