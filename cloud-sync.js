@@ -153,11 +153,16 @@ async function authToken(){
  const body=new URLSearchParams({grant_type:'refresh_token',refresh_token:session.refreshToken}).toString();
  const answer=await request(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
  session.idToken=answer.id_token;
+ if(answer.user_id&&answer.user_id!==session.uid)throw Error('هوية Firebase المستعادة غير مطابقة.');
+ const rotated=!!answer.refresh_token&&answer.refresh_token!==session.refreshToken;
  session.refreshToken=answer.refresh_token||session.refreshToken;
  session.expiry=Date.now()+(Number(answer.expires_in)||3600)*1000;
+ if(rotated&&session.remembered){
+  try{await saveSessionLock()}catch(_){clearLock()}
+ }
  return session.idToken;
 }
-async function signIn(projectId,apiKey,email,password,phrase){
+async function signIn(projectId,apiKey,email,password,phrase,rememberDevice=false){
  if(!/^[a-z][a-z0-9-]{3,60}$/.test(projectId))throw Error('معرّف مشروع Firebase غير صحيح.');
  if(apiKey.length<15||apiKey.length>200)throw Error('أدخل Web API Key الصحيح من Firebase.');
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('أدخل بريدًا إلكترونيًا صالحًا.');
@@ -175,9 +180,15 @@ async function signIn(projectId,apiKey,email,password,phrase){
  session.phrase=phrase;
  session.base=readBase();
  session.active=!!session.base?.hash;
+ session.remembered=!!rememberDevice;
  saveConfig();
+ let failedToRemember=false;
+ if(session.remembered){
+  try{await saveSessionLock()}catch(_){clearLock();failedToRemember=true}
+ }else clearLock();
  statusText('تم تسجيل الدخول. جارٍ مقارنة السجلات المحلية والسحابية…');
  await synchronize(false);
+ if(failedToRemember)setNotice(session.notice+' ⚠ تعذر حفظ الاتصال المشفر على الجهاز؛ ستحتاج إلى تسجيل الدخول الكامل عند إعادة الفتح.');
 }
 function pathFor(collection,id){
  const p=session.projectId,u=session.uid;
@@ -247,17 +258,17 @@ function describeRemote(remote,localHash){
 function summaryV20(){
  const box=E('syncConnectionSummaryV20');
  if(!box)return;
- box.dataset.syncState=session.uid?(session.active?'connected':'attention'):'offline';
+ const msg=session.notice||'';
+ const kind=!session.uid?'offline':msg.includes('تعارض')||msg.includes('⚠')?'conflict':
+  msg.startsWith('تعذرت')?'error':!session.active?'attention':
+  msg.includes('جارٍ')?'syncing':msg.includes('بانتظار')?'pending':'connected';
+ box.dataset.syncState=kind;
  if(!session.uid){
-   box.textContent=readConfig().email?
-     '⚠ '+(session.notice.includes('تم حفظ التعديل على هذا الجهاز فقط')?'تم حفظ التعديل على هذا الجهاز فقط. ':'')+
-     'المزامنة غير متصلة في هذه الجلسة. أعد تسجيل الدخول من «المزامنة المالية بين الأجهزة» حتى تنتقل التعديلات.':
-     '☁ لم تُفعّل المزامنة على هذا الجهاز بعد؛ العمليات تحفظ محليًا فقط.';
- }else if(!session.active){
-   box.textContent='⚠ المزامنة متوقفة للمراجعة: '+session.notice;
- }else{
-   box.textContent='✓ الحساب السحابي متصل: '+session.notice;
- }
+  box.textContent='🔒 '+(msg.includes('تم حفظ التعديل على هذا الجهاز فقط')?'تعديل محلي لم يُزامن بعد. ':'')+
+   (readLock()?'الاتصال محفوظ مشفرًا؛ افتح المزامنة وأدخل عبارة التشفير لتفعيله.':
+    'المزامنة غير متصلة. سجّل الدخول قبل توقع انتقال التعديلات.');
+ }else box.textContent=(kind==='connected'?'✓ ':kind==='syncing'?'↻ ':'⚠ ')+msg+
+  (session.remembered?' · يمكنك فتح الاتصال لاحقًا بعبارة التشفير فقط.':'');
 }
 function refreshStatus(){
  summaryV20();
@@ -267,8 +278,13 @@ function refreshStatus(){
  if(linked)linked.textContent=session.uid?'متصل: '+session.email:'غير متصل';
  const connected=E('syncConnectedControlsV19');
  if(connected)connected.hidden=!session.uid;
- const inactive=E('syncLoginPanelV19');
- if(inactive)inactive.hidden=!!session.uid;
+ const inactive=E('syncLoginPanelV19'),unlock=E('syncUnlockPanelV21');
+ const saved=!!readLock();
+ if(inactive)inactive.hidden=!!session.uid||(saved&&!session.showLoginForm);
+ if(unlock)unlock.hidden=!!session.uid||!saved||session.showLoginForm;
+ const hint=E('syncRememberedHintV21');
+ if(hint)hint.textContent=session.remembered?'✓ اتصال هذا الجهاز محفوظ بشكل مشفر، ويمكن فتحه لاحقًا بعبارة التشفير.':
+ 'هذا الاتصال مفعّل في الجلسة الحالية فقط؛ يلزم تسجيل الدخول عند إعادة فتح التطبيق.';
 }
 function setNotice(msg){session.notice=msg;statusText(msg);refreshStatus()}
 function holdTimer(){if(session.timer)clearTimeout(session.timer);session.timer=null}
@@ -411,7 +427,8 @@ function disconnect(){
  holdTimer();
  session.idToken='';session.refreshToken='';session.phrase='';session.uid='';
  session.active=false;session.base=null;session.busy=false;session.pending=false;
- setNotice('تم قطع اتصال المزامنة. لا تزال البيانات محفوظة على جهازك.');
+ clearLock();session.showLoginForm=false;
+ setNotice('تم قطع الاتصال ومسح وسيلة استعادته من هذا المتصفح؛ السجلات المالية لم تُحذف.');
 }
 function openSettings(){
  const config=readConfig();
