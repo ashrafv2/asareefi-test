@@ -179,8 +179,14 @@ function nonempty(){
   Object.keys(data.budgets||{}).length>0;
 }
 function selectedUI(){
- return !!document.querySelector('#modal[open],#entryFullV13[open],#smartPasteDialog[open]')||
-  !!document.querySelector('input:focus,textarea:focus,select:focus');
+ const modal=document.querySelector('#modal[open]');
+ const syncDialog=!!(modal&&E('syncCurrentStatusV19'));
+ const editing=!!document.querySelector('#entryFullV13[open],#smartPasteDialog[open]')||
+  !!(modal&&!syncDialog);
+ const focused=document.activeElement;
+ const writing=!!focused&&typeof focused.matches==='function'&&
+  focused.matches('input,textarea,select')&&!(syncDialog&&modal.contains(focused));
+ return editing||writing;
 }
 function classification(remoteHash,localHash,baselineHash){
  if(!remoteHash)return baselineHash?'conflict':'empty';
