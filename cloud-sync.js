@@ -201,7 +201,22 @@ function describeRemote(remote,localHash){
  if(remote.hash===localHash)return 'البيانات المحلية والسحابية متطابقة.';
  return 'هناك اختلاف بين الجهاز والسحابة. سنقارن النسختين دون استبدال صامت.';
 }
+function summaryV20(){
+ const box=E('syncConnectionSummaryV20');
+ if(!box)return;
+ box.dataset.syncState=session.uid?(session.active?'connected':'attention'):'offline';
+ if(!session.uid){
+   box.textContent=readConfig().email?
+     '⚠ المزامنة غير متصلة في هذه الجلسة. أعد تسجيل الدخول من «المزامنة المالية بين الأجهزة» قبل توقع انتقال أي تعديل. التغييرات تبقى محفوظة على الجهاز.':
+     '☁ لم تُفعّل المزامنة على هذا الجهاز بعد؛ العمليات تحفظ محليًا فقط.';
+ }else if(!session.active){
+   box.textContent='⚠ المزامنة متوقفة للمراجعة: '+session.notice;
+ }else{
+   box.textContent='✓ الحساب السحابي متصل: '+session.notice;
+ }
+}
 function refreshStatus(){
+ summaryV20();
  const n=E('syncCurrentStatusV19');
  if(n)n.textContent=session.notice;
  const linked=E('syncAccountLabelV19');
@@ -339,6 +354,12 @@ function schedule(){
 }
 function onPersist(){
  if(session.applying)return;
+ if(!session.uid||!session.active){
+  if(!session.uid&&readConfig().email)session.notice='تم حفظ التعديل على هذا الجهاز فقط. سجّل الدخول مجددًا لتفعيل المزامنة.';
+  else if(session.uid&&!session.active)session.notice='التعديل محفوظ محليًا؛ المزامنة متوقفة حتى مراجعة حالة السحابة.';
+  summaryV20();
+  return;
+ }
  if(session.busy){session.pending=true;return}
  schedule();
 }
@@ -405,4 +426,5 @@ window.addEventListener('online',()=>{if(session.uid&&session.active)schedule()}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&session.uid&&session.active)synchronize(false)});
 window.addEventListener('focus',()=>{if(session.uid&&session.active)synchronize(false)});
 setInterval(()=>{if(session.uid&&session.active&&document.visibilityState==='visible')synchronize(false)},90000);
+summaryV20();
 })();
