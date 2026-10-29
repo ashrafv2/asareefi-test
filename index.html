@@ -242,6 +242,13 @@ body.entry-v13-open{overflow:hidden}
  .entry-v13-pad button{min-height:35px!important;font-size:20px!important}
  .entry-v13-type button{min-height:35px!important}
 }
+</style><style id="release-preflight-v15">
+.release-gate-v15{background:#fafdff!important;border:1px solid #cbded0!important}
+.gate-title-v15{font-size:16px;display:block;color:#115e44}
+.gate-intro-v15{font-size:12px;color:var(--muted);margin:7px 0 10px;line-height:1.8}
+.release-gate-v15 .actions{margin:8px 0;display:flex;gap:8px;flex-wrap:wrap}
+.release-gate-v15 .actions .btn{flex:1 1 145px;white-space:normal;text-align:center}
+.gate-results-v15{font-size:12px;line-height:1.9;background:#f1f7f3;border-radius:13px;padding:12px;color:#294b38;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:12px}
 </style></head><body><div class="shell">
 <header class="head v12-head">
   <div class="headtop v12-top">
@@ -335,14 +342,21 @@ body.entry-v13-open{overflow:hidden}
  <div class="card" id="recurringList"></div>
  <div class="notice">يُسجّل الدخل المتكرر في تاريخ استحقاقه عند فتح التطبيق في ذلك اليوم أو بعده. لن تُنشأ العملية مرتين للشهر نفسه.</div>
 </section>
-<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 14 — نموذج إدخال مختصر</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button>
+<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 15 — مراجعة ما قبل الإطلاق</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button>
 <button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
 <button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button>
 <button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
 <section class="page" id="p-receipts"><div class="screenhead"><h2>أرشيف الفواتير</h2></div>
 <div class="notice">تُحفظ المرفقات محليًا في المتصفح. احفظ نسخة احتياطية شاملة على Drive أو iCloud لحماية الصور والملفات.</div>
 <div class="card" style="margin-top:12px"><div class="field"><label for="receiptSearch">البحث عن متجر أو تصنيف أو عملية</label><input id="receiptSearch" type="search" placeholder="بحث في الفواتير"></div><div id="receiptArchive"><div class="empty">لم تُرفق فواتير بعد.</div></div></div></section>
-<section class="page" id="p-backup"><div class="screenhead"><h2>النسخ الاحتياطي</h2></div><div class="card" style="background:#f0f9ec;border:1px solid #d0e9c9;margin-bottom:12px">
+<section class="page" id="p-backup"><div class="screenhead"><h2>النسخ الاحتياطي</h2></div>
+<div class="card release-gate-v15">
+  <strong class="gate-title-v15">فحص سلامة البيانات قبل الإطلاق</strong>
+  <p class="gate-intro-v15">يفحص وجود سجلات النسخة القديمة والتجريبية، واتساق الحسابات والمرفقات، وتجربة ترميز ملف فاتورة. لا يغيّر أي بيانات أو أرصدة.</p>
+  <div class="actions"><button type="button" class="btn" id="releasePreflightV15">تشغيل الفحص</button><button type="button" class="btn outline" id="downloadLegacyV15">حفظ نسخة من بيانات الإصدار القديم</button></div>
+  <div id="releasePreflightResultV15" class="gate-results-v15" role="status" aria-live="polite">لم يُشغّل الفحص بعد. احفظ نسخة احتياطية شاملة أولًا.</div>
+  <p class="footnote">نجاح الفحص الأولي لا يغني عن اختبار تنزيل JSON الشامل ثم استعادته على جهاز أو متصفح منفصل.</p>
+</div><div class="card" style="background:#f0f9ec;border:1px solid #d0e9c9;margin-bottom:12px">
 <strong style="display:block;margin-bottom:6px;color:#1c632e">إدارة البيانات السابقة</strong>
 <p style="font-size:13px;line-height:1.8">يحافظ مصاريفي على بيانات هذا الإصدار. ويمكنك نقل بيانات الإصدار السابق يدويًا دون حذف الأصل، أو استعادة نسخة JSON من iCloud أو Google Drive. احفظ نسخة احتياطية قبل أي استرجاع.</p>
 <button type="button" class="btn secondary" id="copyOldDataToReview">استيراد بيانات الإصدار السابق</button>
@@ -1037,7 +1051,12 @@ document.querySelectorAll('#featureAccess [data-feature]').forEach(button=>{
       alert('لم أعثر على بيانات الإصدار السابق في مساحة التخزين الحالية. يمكن استرجاع نسخة JSON محفوظة من صفحة النسخ الاحتياطي.');
       return;
     }
-    if(!confirm('سيتم نسخ بيانات الإصدار السابق إلى بيئة المراجعة فقط، دون حذف أو تغيير البيانات الأصلية. هل تريد المتابعة؟'))return;
+    const hasCurrent= ['transactions','goals','debts','savings','receivables','recurringIncome'].some(k=>Array.isArray(data[k])&&data[k].length>0);
+    if(hasCurrent){
+      alert('لحماية سجلاتك الحالية، أوقفنا استبدال بيانات هذه النسخة مباشرة. استخدم «حفظ نسخة من بيانات الإصدار القديم» و«مشاركة النسخة» قبل أي استعادة يدوية؛ لن نحذف بياناتك الحالية.');
+      return;
+    }
+    if(!confirm('وجدت بيانات قديمة، والنسخة الحالية لا تحتوي على سجلات. سيُنسخ الأصل دون حذفه. تأكد من الاحتفاظ بنسخة احتياطية قبل المتابعة.'))return;
     try{
       data=hydrate(found);
       persist();
@@ -1139,6 +1158,70 @@ async function importAll(file){
   try{await replaceAll(mapped);data=hydrate(raw);persist();setQuickType('expense');applyTheme();await showArchive();alert('استُرجعت البيانات والفواتير بنجاح.')}catch(e){await replaceAll(oldFiles);data=oldData;persist();throw e}
  }catch(e){alert('تعذرت الاستعادة: '+e.message)}
 }
+/* v15: Read-only data integrity check. No records, savings or files are modified. */
+function releaseCheckV15(){
+ const output=byId('releasePreflightResultV15'),btn=byId('releasePreflightV15');
+ if(!output||!btn)return;
+ btn.disabled=true;output.textContent='جارٍ فحص البيانات والمرفقات المحلية...';
+ (async()=>{
+  const warnings=[],failures=[],lines=[],count=k=>Array.isArray(data[k])?data[k].length:0;
+  const sources=[['النسخة التجريبية',KEY],['الإصدار الأساسي السابق','masareefi_v2'],['الإصدار الأقدم','masareefi_v1']];
+  for(const [name,key] of sources){
+   const raw=localStorage.getItem(key);
+   if(!raw){lines.push(name+': لا توجد سجلات محفوظة بهذا المفتاح');continue;}
+   try{
+     const sample=JSON.parse(raw);
+     if(!sample||typeof sample!=='object'||!Array.isArray(sample.transactions)){warnings.push(name+': صيغة غير متوقعة');continue}
+     lines.push(name+': '+sample.transactions.length+' عملية و'+(sample.receivables?.length||0)+' مستحقات و'+(sample.savings?.length||0)+' حركة ادخار');
+   }catch(e){failures.push(name+': تعذر قراءة JSON المحلي')}
+  }
+  const current={transactions:count('transactions'),savings:count('savings'),receivables:count('receivables'),debts:count('debts'),goals:count('goals')};
+  lines.push('بيانات التطبيق الحالية: '+JSON.stringify(current));
+  const income=sum(data.transactions.filter(t=>t.type==='income')),
+        expense=sum(data.transactions.filter(t=>t.type==='expense'));
+  if(!Number.isFinite(income)||!Number.isFinite(expense))failures.push('المعاملات: مجموع مالي غير صالح');
+  if(data.transactions.some(t=>!Number.isFinite(Number(t.amount))||Number(t.amount)<=0||!/^\d{4}-\d{2}-\d{2}$/.test(String(t.date||''))))warnings.push('معاملات تحتاج مراجعة مبلغ أو تاريخ');
+  const accounts=data.savingAccounts||[];
+  const balances=accounts.map(a=>({id:a.id,value:savingAccountTotal(a.id)}));
+  if(balances.some(x=>!Number.isFinite(x.value)))failures.push('تعذر احتساب أحد حسابات الادخار');
+  const saved=balances.reduce((a,x)=>a+x.value,0),owed=owedTotal();
+  if(!Number.isFinite(owed))failures.push('المستحقات: إجمالي غير صالح');
+  if(data.receivables.some(x=>Number(x.remaining)<0||Number(x.remaining)>Number(x.amount)))warnings.push('مستحقات تحتاج مراجعة: المتبقي خارج حدود الأصل');
+  lines.push('الأرصدة المحسوبة: ادخار '+money(saved)+' | مستحقات '+money(owed));
+  const snapshot=JSON.parse(JSON.stringify(data));
+  for(const k of ['transactions','savings','receivables','debts','goals']){
+   if((snapshot[k]||[]).length!==count(k))failures.push('اختلاف عند تحويل بيانات '+k+' إلى JSON');
+  }
+  try{
+    const receipts=await allFiles();
+    const txIds=new Set((data.transactions||[]).map(t=>String(t.id)));
+    const orphan=receipts.filter(x=>!txIds.has(String(x.txId)));
+    const bytes=receipts.reduce((sum,x)=>sum+(Number(x.size)||0),0);
+    if(orphan.length)warnings.push('توجد '+orphan.length+' فاتورة غير مرتبطة بعملية حالية');
+    if(bytes>MAX_TOTAL)warnings.push('تجاوز حجم المرفقات حد النسخ الشامل');
+    if(receipts.some(x=>x.size>MAX_FILE))warnings.push('توجد فاتورة أكبر من الحد المسموح للملف');
+    const testBlob=new Blob([new Uint8Array([0,1,2,30,42,255])],{type:'application/pdf'});
+    const converted=fromB64(await toB64(testBlob),'application/pdf');
+    if(converted.size!==testBlob.size)failures.push('فشل اختبار ترميز/فك ترميز المرفق');
+    lines.push('الفواتير: '+receipts.length+' ملف | إجمالي '+(bytes/1048576).toFixed(2)+' ميجابايت');
+  }catch(e){failures.push('فحص IndexedDB للمرفقات غير مكتمل: '+(e.message||e))}
+  output.textContent=(failures.length?'⛔ يحتاج إصلاح':warnings.length?'⚠ يحتاج مراجعة':'✓ اجتاز الفحص الأولي')+
+    '\n\n'+lines.join('\n')+
+    (warnings.length?'\n\nملاحظات:\n'+warnings.map(x=>'• '+x).join('\n'):'')+
+    (failures.length?'\n\nأخطاء:\n'+failures.map(x=>'• '+x).join('\n'):'')+
+    '\n\nللاعتماد النهائي: نزّل نسخة شاملة مع الفواتير، ثم جرّب استعادتها على بيئة منفصلة، وتحقق من تطابق الأرصدة.';
+ })().catch(e=>{output.textContent='تعذر إكمال الفحص: '+String(e.message||e)}).finally(()=>{btn.disabled=false});
+}
+byId('releasePreflightV15')?.addEventListener('click',releaseCheckV15);
+byId('downloadLegacyV15')?.addEventListener('click',()=>{
+ let source=null,sourceKey='';
+ for(const key of ['masareefi_v2','masareefi_v1']){
+  try{const str=localStorage.getItem(key);if(!str)continue;const x=JSON.parse(str);if(x&&Array.isArray(x.transactions)){source=x;sourceKey=key;break}}catch(e){}
+ }
+ if(!source){alert('لا توجد نسخة سابقة صالحة في هذا المتصفح. إذا كانت البيانات على تطبيق الشاشة الرئيسية، افتحه وأنشئ النسخة منه ثم استوردها يدويًا.');return}
+ download(JSON.stringify(source,null,2),'masareefi-legacy-'+sourceKey+'-'+today()+'.json','application/json');
+});
+
 // Capture original backup actions and replace them with attachment-complete backups.
 byId('downloadBackup')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();exportAll(false)},true);
 byId('shareBackup')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();exportAll(true)},true);
