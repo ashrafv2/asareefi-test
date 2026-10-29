@@ -349,11 +349,15 @@ function summaryV20(){
   msg.includes('جارٍ')?'syncing':msg.includes('بانتظار')?'pending':'connected';
  box.dataset.syncState=kind;
  if(!session.uid){
-  box.textContent='🔒 '+(msg.includes('تم حفظ التعديل على هذا الجهاز فقط')?'تعديل محلي لم يُزامن بعد. ':'')+
-   (readLock()?'الاتصال محفوظ مشفرًا؛ افتح المزامنة وأدخل عبارة التشفير لتفعيله.':
-    'المزامنة غير متصلة. سجّل الدخول قبل توقع انتقال التعديلات.');
+  const state=vaultMeta?.mode==='automatic'?
+   (session.autoRestoring?'جارٍ إعادة الاتصال تلقائيًا.':msg.includes('تعذرت استعادة')?msg:'الاتصال التلقائي مفعّل على هذا الجهاز؛ سيبدأ عند فتحه واتصال الإنترنت.'):
+   vaultMeta?.mode==='passkey'?'الفتح ببصمة الجهاز/رمز القفل مفعّل. افتح المزامنة للتحقق عند بدء الجلسة.':
+   readLock()?'الاتصال محفوظ بعبارة التشفير؛ افتح المزامنة لإدخالها.':'المزامنة غير متصلة. افتح المزامنة لتسجيل الدخول.';
+  box.textContent='🔒 '+(msg.includes('تم حفظ التعديل على هذا الجهاز فقط')?'هناك تعديل محلي لم يُزامن بعد. ':'')+state;
  }else box.textContent=(kind==='connected'?'✓ ':kind==='syncing'?'↻ ':'⚠ ')+msg+
-  (session.remembered?' · يمكنك فتح الاتصال لاحقًا بعبارة التشفير فقط.':'');
+  (session.deviceMode==='automatic'?' · الاتصال التلقائي مفعّل على هذا الجهاز.':
+   session.deviceMode==='passkey'?' · الدخول ببصمة الجهاز مفعّل.':
+   session.remembered?' · فتح الاتصال يتطلب عبارة التشفير فقط.':'');
 }
 function refreshStatus(){
  summaryV20();
@@ -363,15 +367,32 @@ function refreshStatus(){
  if(linked)linked.textContent=session.uid?'متصل: '+session.email:'غير متصل';
  const connected=E('syncConnectedControlsV19');
  if(connected)connected.hidden=!session.uid;
- const inactive=E('syncLoginPanelV19'),unlock=E('syncUnlockPanelV21');
- const saved=!!readLock();
- if(inactive)inactive.hidden=!!session.uid||(saved&&!session.showLoginForm);
- if(unlock)unlock.hidden=!!session.uid||!saved||session.showLoginForm;
+ const inactive=E('syncLoginPanelV19'),unlock=E('syncUnlockPanelV21'),faceUnlock=E('syncPasskeyUnlockPanelV22');
+ const useFace=vaultMeta?.mode==='passkey'&&!session.showLoginForm;
+ const saved=!!readLock()&&!useFace&&!session.showLoginForm;
+ if(inactive)inactive.hidden=!!session.uid||useFace||saved;
+ if(unlock)unlock.hidden=!!session.uid||!saved;
+ if(faceUnlock)faceUnlock.hidden=!!session.uid||!useFace;
  const hint=E('syncRememberedHintV21');
  if(hint)hint.textContent=session.remembered?'✓ اتصال هذا الجهاز محفوظ بشكل مشفر، ويمكن فتحه لاحقًا بعبارة التشفير.':
  'هذا الاتصال مفعّل في الجلسة الحالية فقط؛ يلزم تسجيل الدخول عند إعادة فتح التطبيق.';
  const rememberButton=E('syncRememberDeviceV21');
- if(rememberButton)rememberButton.textContent=session.remembered?'إلغاء تذكّر هذا الجهاز':'تذكّر هذا الجهاز';
+ if(rememberButton){
+  rememberButton.hidden=!!session.deviceMode;
+  rememberButton.textContent=session.remembered?'إلغاء تذكّر هذا الجهاز':'تذكّر هذا الجهاز بعبارة التشفير';
+ }
+ const autoButton=E('syncAutoV22');
+ if(autoButton){
+  autoButton.disabled=session.deviceMode==='automatic';
+  autoButton.textContent=session.deviceMode==='automatic'?'✓ الاتصال التلقائي مفعّل':'تفعيل الاتصال التلقائي';
+ }
+ const passkeyButton=E('syncPasskeyV22');
+ if(passkeyButton){
+  passkeyButton.disabled=session.deviceMode==='passkey';
+  passkeyButton.textContent=session.deviceMode==='passkey'?'✓ بصمة الجهاز مفعّلة':'تفعيل بصمة الجهاز / رمز القفل';
+ }
+ const forgetButton=E('syncForgetV22');
+ if(forgetButton)forgetButton.hidden=!session.deviceMode&&!vaultMeta;
 }
 function setNotice(msg){session.notice=msg;statusText(msg);refreshStatus()}
 function holdTimer(){if(session.timer)clearTimeout(session.timer);session.timer=null}
@@ -515,7 +536,7 @@ function schedule(){
 function onPersist(){
  if(session.applying)return;
  if(!session.uid||!session.active){
-  if(!session.uid&&readConfig().email)session.notice='تم حفظ التعديل على هذا الجهاز فقط. سجّل الدخول مجددًا لتفعيل المزامنة.';
+  if(!session.uid&&readConfig().email)session.notice='تم حفظ التعديل على هذا الجهاز فقط. '+(vaultMeta?.mode==='automatic'?'ستتم المزامنة عند استعادة الاتصال التلقائي.':'افتح المزامنة لتفعيل الاتصال.');
   else if(session.uid&&!session.active)session.notice='التعديل محفوظ محليًا؛ المزامنة متوقفة حتى مراجعة حالة السحابة.';
   summaryV20();
   return;
@@ -523,12 +544,14 @@ function onPersist(){
  if(session.busy){session.pending=true;return}
  schedule();
 }
-function disconnect(){
+async function disconnect(){
+ try{await forgetDeviceV22()}
+ catch(e){return setNotice('تعذر إلغاء اتصال الجهاز المحفوظ: '+String(e.message||e))}
  holdTimer();
  session.idToken='';session.refreshToken='';session.phrase='';session.uid='';
  session.active=false;session.base=null;session.busy=false;session.pending=false;
- clearLock();session.showLoginForm=false;
- setNotice('تم قطع الاتصال ومسح وسيلة استعادته من هذا المتصفح؛ السجلات المالية لم تُحذف.');
+ session.showLoginForm=false;
+ setNotice('تم قطع الاتصال وحذف وسيلة استعادته من هذا المتصفح. السجلات المالية لم تُحذف.');
 }
 function openSettings(){
  const config=readConfig();
