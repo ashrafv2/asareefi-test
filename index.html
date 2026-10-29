@@ -310,7 +310,10 @@ body.entry-v13-open{overflow:hidden}
  font-size:12px;line-height:1.85;border:1px solid var(--line);
  background:var(--theme-soft-2,#f3f8f5);color:var(--muted);overflow-wrap:anywhere}
 .sync-summary-v20[data-sync-state="connected"]{border-color:#b8dec5;background:#eefaf1;color:#195c37}
-.sync-summary-v20[data-sync-state="attention"]{border-color:#eacb8e;background:#fff8e8;color:#785018}
+.sync-summary-v20[data-sync-state="syncing"]{border-color:#bddcf2;background:#f1f8ff;color:#155b8b}
+.sync-summary-v20[data-sync-state="pending"]{border-color:#e9d6a0;background:#fffbef;color:#825b1b}
+.sync-summary-v20[data-sync-state="attention"],.sync-summary-v20[data-sync-state="conflict"]{border-color:#eacb8e;background:#fff8e8;color:#785018}
+.sync-summary-v20[data-sync-state="error"]{border-color:#f1bdb6;background:#fff3f1;color:#99372a}
 .sync-summary-v20[data-sync-state="offline"]{border-color:#e5c7b1;background:#fff8f4;color:#805037}
 </style></head><body><div class="shell">
 <header class="head v12-head">
@@ -405,10 +408,10 @@ body.entry-v13-open{overflow:hidden}
  <div class="card" id="recurringList"></div>
  <div class="notice">يُسجّل الدخل المتكرر في تاريخ استحقاقه عند فتح التطبيق في ذلك اليوم أو بعده. لن تُنشأ العملية مرتين للشهر نفسه.</div>
 </section>
-<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 20 — توضيح حالة مزامنة الأجهزة</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button><button class="settingsitem" id="merchantLogosSettingsV17" type="button">🏷️ شعارات المتاجر والجهات <span>‹</span></button>
+<section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 21 — توضيح حالة مزامنة الأجهزة</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button><button class="settingsitem" id="merchantLogosSettingsV17" type="button">🏷️ شعارات المتاجر والجهات <span>‹</span></button>
 <button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
 <button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button><button class="settingsitem" id="shortcutHelpV16" type="button">📩 ربط رسائل البنك باختصارات الآيفون <span>‹</span></button>
-<button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" id="financeSyncSettingsV19" type="button">☁ المزامنة المالية بين الأجهزة <span>‹</span></button><div id="syncConnectionSummaryV20" class="sync-summary-v20" role="status" aria-live="polite">جارٍ فحص حالة المزامنة...</div><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. المزامنة التلقائية غير مفعّلة.</div></section>
+<button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" id="financeSyncSettingsV19" type="button">☁ المزامنة المالية بين الأجهزة <span>‹</span></button><div id="syncConnectionSummaryV20" class="sync-summary-v20" role="status" aria-live="polite">جارٍ فحص حالة المزامنة...</div><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. يمكن تفعيل المزامنة المالية المشفرة من الإعدادات؛ تعمل أثناء فتح التطبيق وبعد تسجيل الدخول.</div></section>
 <section class="page" id="p-receipts"><div class="screenhead"><h2>أرشيف الفواتير</h2></div>
 <div class="notice">تُحفظ المرفقات محليًا في المتصفح. احفظ نسخة احتياطية شاملة على Drive أو iCloud لحماية الصور والملفات.</div>
 <div class="card" style="margin-top:12px"><div class="field"><label for="receiptSearch">البحث عن متجر أو تصنيف أو عملية</label><input id="receiptSearch" type="search" placeholder="بحث في الفواتير"></div><div id="receiptArchive"><div class="empty">لم تُرفق فواتير بعد.</div></div></div></section>
@@ -2134,4 +2137,4 @@ function entryKeyLogicV13(current,key){
     .catch(()=>{ /* Network-first app remains functional without service worker. */ }),{once:true});
  }
 })();
-</script><script src="./cloud-sync.js?v=20" defer></script></body></html>
+</script><script src="./cloud-sync.js?v=21" defer></script></body></html>
