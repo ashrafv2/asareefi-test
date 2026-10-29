@@ -1734,4 +1734,84 @@ function entryKeyLogicV13(current,key){
  dialog.addEventListener('close',()=>{document.body.classList.remove('entry-v13-open');dialog.classList.remove('note-focused')});
  dialog.addEventListener('cancel',e=>{e.preventDefault();close()});
 })();
-</script></body></html>
+</script><script id="bank-shortcuts-v16">
+(function(){
+ 'use strict';
+ const PREFIX='#masareefi-sms=';
+ const BASE='https://ashrafv2.github.io/asareefi-test/'+PREFIX;
+ const el=id=>document.getElementById(id);
+ const spends=/(?:\bPOS\s*Purchase\b|\bPay\s*Amount\b|\bDebit\b|\bPurchase\b|شراء|خصم|نقاط\s*بيع|سحب|حوالة\s*صادرة|تحويل\s*صادر|دفع\s*بطاقة)/i;
+ const excluded=/(?:\bOTP\b|\bverification\s*code\b|\bone.time\s*passcode\b|\brefund\b|\breversal\b|\breversed\b|\bcancelled\b|استرجاع|استرداد|إلغاء|الغاء|عكس\s*عملية|رمز\s*(?:التحقق|التأكيد|التفعيل|الدخول))/i;
+ const demo='POS Purchase\nBy:3958;mada-Apple Pay\nPay Amount: SAR 8.70\nAt:BOQSHA 29/10/26 22:29';
+ function receive(){
+  const hash=location.hash||'';
+  if(!hash.startsWith(PREFIX))return;
+  const payload=hash.slice(PREFIX.length);
+  try{history.replaceState(history.state,'',location.pathname+location.search)}catch(e){location.hash=''}
+  if(!payload||payload.length>9000){alert('نص رسالة الاختصار طويل جدًا أو غير مكتمل.');return}
+  let msg;
+  try{msg=decodeURIComponent(payload).trim()}catch(e){alert('تعذر قراءة الرسالة المرمزة من الاختصارات.');return}
+  if(msg.length<9||msg.length>2200){alert('طول الرسالة غير مناسب؛ ألصقها يدويًا.');return}
+  if(excluded.test(msg)){alert('هذه رسالة رمز تحقق أو إلغاء أو استرجاع؛ لن نجهزها كمصروف.');return}
+  if(!spends.test(msg)){alert('الرسالة لا تبدو إشعار خصم أو شراء؛ لم تُضف أي عملية.');return}
+  const d=el('smartPasteDialog'),raw=el('smartPasteRaw'),stat=el('smartPasteStatus');
+  if(!d||!raw||!stat)return;
+  if(d.open&&raw.value.trim()){alert('توجد رسالة قيد المراجعة؛ لم نستبدلها.');return}
+  el('smartPasteHomeOpen')?.click();
+  if(!d.open&&typeof d.showModal==='function')d.showModal();
+  raw.value=msg;
+  el('smartPasteAnalyze')?.click();
+  const amount=Number(el('smartPasteAmount')?.value||0);
+  if(el('smartPasteType')?.value!=='expense'){stat.textContent='نوع الرسالة غير واضح. راجع النوع والمبلغ قبل الحفظ.';return}
+  if(!Number.isFinite(amount)||amount<=0){stat.textContent='لم يتم استخراج المبلغ بثقة؛ راجعه وأدخله يدويًا.';return}
+  const sel=el('smartPasteCategory');
+  const name=String(el('smartPasteDescription')?.value||'').trim().toLocaleLowerCase();
+  const opts=[...sel.options].map(o=>o.value);
+  const old=(data.transactions||[]).find(t=>t.type==='expense'&&name&&String(t.note||'').trim().toLocaleLowerCase()===name&&opts.includes(t.category));
+  if(old)sel.value=old.category;
+  else{
+   if(!opts.includes(''))sel.add(new Option('اختر التصنيف',''),0);
+   sel.value='';
+  }
+  stat.textContent=old?'رسالة من اختصار الآيفون. تعرّفنا على تصنيف متجر سابق؛ راجع المعلومات ثم أكّد الحفظ.':'رسالة من اختصار الآيفون. اختر التصنيف وراجع المبلغ والمتجر والتاريخ، ثم أكّد الحفظ. لن تُحفظ العملية تلقائيًا.';
+ }
+ const help=el('shortcutHelpV16');
+ if(help)help.addEventListener('click',function(){
+  const body='<div class="bank-shortcut-guide-v16">'+
+   '<p>يسمح اختصار الآيفون بقراءة رسالة الخصم عند وصولها وفتح مصاريفي <b>للمراجعة قبل الحفظ</b>.</p>'+
+   '<ol><li>افتح <b>الاختصارات ← الأتمتة ← + ← رسالة</b>، واختر مرسل البنك أو شرط <code>POS Purchase</code> أو <code>شراء</code>.</li>'+
+   '<li>اختر <b>تشغيل فورًا</b>، ثم أضف إجراء <b>ترميز URL (URL Encode)</b> واستخدم متغير <b>إدخال الاختصار ← محتوى الرسالة</b>.</li>'+
+   '<li>أضف إجراء <b>نص (Text)</b>: ألصق الرابط أدناه ثم أضف المتغير <b>النص المرمّز</b> مباشرة بعد علامة =.</li>'+
+   '<li>أضف إجراء <b>فتح عناوين URL (Open URLs)</b> واختر نتيجة إجراء النص، ثم احفظ الأتمتة.</li>'+
+   '<li>عند وصول رسالة خصم سيُفتح التحليل؛ قد يتطلب ذلك فتح قفل الآيفون أو التفاعل مع إشعار.</li></ol>'+
+   '<label for="bankShortcutBaseV16">الرابط الأساسي للنسخ</label>'+
+   '<input id="bankShortcutBaseV16" type="text" dir="ltr" readonly value="'+BASE+'">'+
+   '<div class="actions"><button class="btn" id="bankShortcutCopyV16" type="button">نسخ الرابط</button><button class="btn secondary" id="bankShortcutTestV16" type="button">تجربة رسالة وهمية</button></div>'+
+   '<p class="footnote">نص الرسالة يمر داخل جزء # من الرابط ثم يُزال مباشرة من شريط العنوان؛ لا تشارك روابط تحتوي على رسائل بنكية حقيقية. الأتمتة تحتاج إعدادًا على الآيفون نفسه.</p></div>';
+  openModal('رسائل البنك واختصارات الآيفون',body,function(){
+   el('bankShortcutCopyV16').onclick=async function(){
+    try{await navigator.clipboard.writeText(BASE);this.textContent='✓ تم النسخ'}
+    catch(e){const x=el('bankShortcutBaseV16');x.focus();x.select();alert('انسخ الرابط المحدد يدويًا.')}
+   };
+   el('bankShortcutTestV16').onclick=function(){
+    closeModal();
+    location.hash=PREFIX.slice(1)+encodeURIComponent(demo);
+    receive();
+    if(el('smartPasteStatus'))el('smartPasteStatus').textContent='رسالة اختبار وهمية بقيمة 8.70 ر.س. راجع المعلومات، ولا تحفظها إلا إذا أردت تسجيل عملية تجريبية.';
+   };
+  });
+ });
+ window.addEventListener('hashchange',receive);
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',receive,{once:true});
+ else receive();
+})();
+</script>
+<style id="bank-shortcuts-v16-style">
+.bank-shortcut-guide-v16{font-size:13px;line-height:1.9}
+.bank-shortcut-guide-v16 ol{padding-inline-start:24px}
+.bank-shortcut-guide-v16 li{margin:0 0 10px}
+.bank-shortcut-guide-v16 code{direction:ltr;padding:2px 4px;background:var(--theme-soft-2,#f0f6f1);border-radius:4px}
+.bank-shortcut-guide-v16 input{width:100%;min-height:44px;background:#fff;border:1px solid var(--line);border-radius:10px;font-size:12px;padding:8px;margin:8px 0}
+.bank-shortcut-guide-v16 .actions{display:flex;flex-wrap:wrap;gap:8px}
+.bank-shortcut-guide-v16 .actions button{flex:1 1 140px}
+</style></body></html>
