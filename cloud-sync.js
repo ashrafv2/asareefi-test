@@ -388,8 +388,11 @@ function refreshStatus(){
  if(unlock)unlock.hidden=!!session.uid||!saved;
  if(faceUnlock)faceUnlock.hidden=!!session.uid||!useFace;
  const hint=E('syncRememberedHintV21');
- if(hint)hint.textContent=session.remembered?'✓ اتصال هذا الجهاز محفوظ بشكل مشفر، ويمكن فتحه لاحقًا بعبارة التشفير.':
- 'هذا الاتصال مفعّل في الجلسة الحالية فقط؛ يلزم تسجيل الدخول عند إعادة فتح التطبيق.';
+ if(hint)hint.textContent=session.deviceMode==='automatic'?
+  '✓ الاتصال التلقائي مفعّل على هذا الجهاز. سيُستعاد اتصال Firebase عند فتح التطبيق واتصال الإنترنت.':
+  session.deviceMode==='passkey'?'✓ فتح الاتصال ببصمة الجهاز أو رمز القفل مفعّل.':
+  session.remembered?'✓ اتصال هذا الجهاز محفوظ بشكل مشفر، ويمكن فتحه لاحقًا بعبارة التشفير.':
+  'هذا الاتصال مفعّل في الجلسة الحالية فقط؛ يلزم تسجيل الدخول عند إعادة فتح التطبيق.';
  const rememberButton=E('syncRememberDeviceV21');
  if(rememberButton){
   rememberButton.hidden=!!session.deviceMode;
