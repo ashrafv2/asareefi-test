@@ -1,4 +1,4 @@
-/* Masareefi 2.0 — v22 encrypted financial sync and optional trusted-device restore.
+/* Masareefi 2.0 — release-candidate audit v23: conflict and restore safeguards.
  * Does NOT upload attachments, card messages, passwords, or credentials to GitHub.
  * Cloud transactions are encrypted with AES-GCM + PBKDF2 using a session-only phrase.
  */
@@ -14,7 +14,7 @@ const MAX_PARTS=32;
 const ENC=new TextEncoder(),DEC=new TextDecoder();
 const E=id=>document.getElementById(id);
 const statusText=message=>{const node=E('syncStatusV19');if(node)node.textContent=message};
-const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,remembered:false,showLoginForm:false,unlockBusy:false,autoRestoring:false,deviceMode:'',notice:'لم يتم ربط الحساب السحابي بعد.'};
+const session={projectId:'',apiKey:'',email:'',uid:'',idToken:'',refreshToken:'',expiry:0,phrase:'',active:false,busy:false,applying:false,pending:false,base:null,timer:null,remembered:false,showLoginForm:false,unlockBusy:false,autoRestoring:false,deviceMode:'',generation:0,notice:'لم يتم ربط الحساب السحابي بعد.'};
 const savedConfig=readConfig();
 function readConfig(){
  try{const raw=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}');return raw&&typeof raw==='object'?raw:{}}catch(e){return {}}
@@ -433,13 +433,18 @@ async function validateCloudPassphrase(){
  }
 }
 
-async function adoptRemote(manifest,auto=false){
- if(auto&&selectedUI()){setNotice('توجد نسخة سحابية جديدة؛ سيتم استلامها عند إغلاق محرر العملية أو الضغط على «مزامنة الآن».');return}
+async function adoptRemote(manifest,auto=false,epoch=session.generation){
+ if(auto&&selectedUI()){
+  setNotice('توجد نسخة سحابية جديدة؛ سيتم استلامها بعد إغلاق محرر العملية.');
+  return;
+ }
  const originalHash=await currentHash();
  const received=await readSnapshot(manifest);
- if(auto&&(selectedUI()||(await currentHash())!==originalHash)){
-  session.pending=true;
-  setNotice('تغيّرت بيانات هذا الجهاز أثناء تنزيل النسخة؛ أوقفنا الاستبدال لحمايتها.');
+ if(epoch!==session.generation)throw Error('توقفت المزامنة لأن بيانات الجهاز استُعيدت أو تغيرت الجلسة.');
+ if((await currentHash())!==originalHash)
+  throw Error('تغيرت السجلات أثناء التنزيل؛ لم نستبدل أي بيانات محلية. أعد المحاولة بعد حفظ التعديلات.');
+ if(auto&&selectedUI()){
+  setNotice('تم تأجيل تنزيل السحابة حتى إغلاق محرر العملية. لا توجد بيانات مستبدلة.');
   return;
  }
  // An encrypted cloud snapshot contains only financial JSON. Receipts remain in IndexedDB.
@@ -454,11 +459,11 @@ async function adoptRemote(manifest,auto=false){
   setNotice('✓ تم تنزيل السجلات المالية المشفرة وتحديثها على هذا الجهاز. المرفقات تُنقل بالنسخة الاحتياطية اليدوية.');
  }catch(e){
   data=oldData;
-  try{render()}catch(_){}
+  try{localStorage.setItem(KEY,JSON.stringify(oldData));render()}catch(_){}
   throw e;
  }finally{session.applying=false}
 }
-async function uploadSnapshot(existing){
+async function uploadSnapshot(existing,epoch=session.generation){
  const json=stableStringify(data);
  const bytes=ENC.encode(json);
  if(bytes.length>MAX_DATA_BYTES)throw Error('السجل المالي كبير جدًا للمزامنة الحالية (8 ميجابايت). استخدم النسخ الاحتياطي اليدوي.');
@@ -469,12 +474,14 @@ async function uploadSnapshot(existing){
   return;
  }
  const enc=await encryptSnapshot(json,session.phrase);
+ if(epoch!==session.generation)throw Error('توقفت المزامنة بسبب استعادة بيانات أو قطع الاتصال.');
  const parts=[];
  for(let i=0;i<enc.content.length;i+=CHUNK_SIZE)parts.push(enc.content.slice(i,i+CHUNK_SIZE));
  if(!parts.length||parts.length>MAX_PARTS)throw Error('حجم النسخة المشفرة تجاوز الحد المتاح لهذه المرحلة.');
  const revision=crypto.randomUUID().replace(/-/g,'');
  // Upload immutable chunks first; only after all succeed publish the new manifest.
  for(let i=0;i<parts.length;i++){
+  if(epoch!==session.generation)throw Error('توقفت المزامنة بسبب استعادة بيانات أو قطع الاتصال.');
   await firestore('sync_chunks',revision+'_'+String(i),'PATCH',{
    revision:{stringValue:revision},part:{integerValue:String(i)},payload:{stringValue:parts[i]}
   },{exists:false});
@@ -485,36 +492,42 @@ async function uploadSnapshot(existing){
   parts:{integerValue:String(parts.length)},format:{integerValue:'1'},
   size:{integerValue:String(bytes.length)},updatedAt:{timestampValue:new Date().toISOString()}
  };
+ if(epoch!==session.generation)throw Error('توقفت المزامنة بسبب استعادة بيانات أو قطع الاتصال.');
+ if((await currentHash())!==hash)throw Error('تغيرت السجلات أثناء الرفع؛ أوقفنا نشر النسخة القديمة. سيُعاد فحص التغييرات.');
  const current=await firestore('sync','meta','PATCH',fields,existing?{updateTime:existing.updateTime}:{exists:false});
  if(!current?.updateTime)throw Error('لم تؤكد السحابة حفظ النسخة الجديدة.');
+ if(epoch!==session.generation)throw Error('اكتمل طلب رفع سابق أثناء استعادة البيانات؛ تحقّق من السحابة قبل المزامنة التالية.');
  saveBase({hash,revision,updateTime:current.updateTime});
  session.active=true;
- setNotice('✓ تمت مزامنة البيانات المالية المشفرة بنجاح. '+new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}));
+ if((await currentHash())!==hash)session.pending=true;
+ setNotice(session.pending?'✓ تم رفع النسخة السابقة؛ توجد تعديلات أحدث بانتظار المزامنة.':
+  '✓ تمت مزامنة البيانات المالية المشفرة بنجاح. '+new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}));
 }
 async function synchronize(force,choice=''){
  if(!session.uid)return setNotice('سجّل الدخول أولًا إلى حساب المزامنة.');
  if(session.busy)return;
  if(!navigator.onLine)return setNotice('لا يوجد اتصال حاليًا؛ بياناتك محفوظة على الجهاز. أعد الاتصال لإتمام المزامنة.');
- holdTimer();session.busy=true;setNotice('جارٍ التحقق من نسخة السحابة…');
+ holdTimer();session.busy=true;const epoch=session.generation;setNotice('جارٍ التحقق من نسخة السحابة…');
  try{
   const localHash=await currentHash();
   const remote=await readManifest();
   const remoteHash=remote?.hash||null;
+  if(epoch!==session.generation)return;
   const action=classification(remoteHash,localHash,session.base?.hash);
   if(choice==='upload'){
    if(!force)throw Error('الرفع الذي يستبدل النسخة السحابية يحتاج إلى تأكيد صريح.');
-   await uploadSnapshot(remote);
+   await uploadSnapshot(remote,epoch);
   }else if(choice==='download'){
    if(!remote)throw Error('لا توجد نسخة سحابية قابلة للتنزيل.');
    if(!force)throw Error('استبدال النسخة المحلية يحتاج إلى تأكيد صريح.');
-   await adoptRemote(remote);
+   await adoptRemote(remote,false,epoch);
   }else if(action==='equal'){
    saveBase({hash:localHash,revision:remote.revision,updateTime:remote.updateTime});
    session.active=true;setNotice('✓ البيانات متطابقة بين الجهاز والسحابة؛ المزامنة التلقائية مفعّلة أثناء فتح التطبيق.');
   }else if(action==='upload'&&session.active){
-   await uploadSnapshot(remote);
+   await uploadSnapshot(remote,epoch);
   }else if(action==='download'&&session.active){
-   await adoptRemote(remote,true);
+   await adoptRemote(remote,true,epoch);
   }else if(action==='empty'){
    session.active=false;
    setNotice('الحساب السحابي جديد. اضغط «رفع بيانات هذا الجهاز» لتأسيس النسخة الأولى بعد مراجعة سجلاتك.');
@@ -523,13 +536,16 @@ async function synchronize(force,choice=''){
    setNotice('⚠ تعارض بين نسختين أو جهاز جديد. لا يتم الدمج أو الحذف تلقائيًا. احفظ نسخة JSON كاملة، ثم اختر رفع الجهاز أو استلام السحابة يدويًا.');
   }
  }catch(e){
+  if(epoch!==session.generation)return;
   if(e.status===409||e.status===412){
    session.active=false;setNotice('⚠ تم تحديث السحابة من جهاز آخر أثناء الرفع؛ لم نكتب فوقه. راجع التعارض.');
   }else setNotice('تعذرت المزامنة: '+String(e.message||e).slice(0,170));
  }finally{
-  session.busy=false;
-  refreshStatus();
-  if(session.pending&&session.active){session.pending=false;schedule()}
+  if(epoch===session.generation){
+   session.busy=false;
+   refreshStatus();
+   if(session.pending&&session.active){session.pending=false;schedule()}
+  }
  }
 }
 function schedule(){
@@ -537,6 +553,14 @@ function schedule(){
  holdTimer();
  setNotice('تغييرات محلية بانتظار الرفع الآمن…');
  session.timer=setTimeout(()=>{session.timer=null;synchronize(false)},2400);
+}
+function onBulkRestore(){
+ // A confirmed local JSON import/legacy transfer must NEVER silently replace the cloud.
+ ++session.generation;
+ holdTimer();
+ session.busy=false;session.active=false;session.pending=false;
+ session.base=null;
+ setNotice('⚠ تم استعادة سجلات محليًا. أوقفنا الرفع والاستلام التلقائي لحماية السحابة. احفظ نسخة احتياطية، ثم راجع النسختين واختر اتجاه المزامنة يدويًا.');
 }
 function onPersist(){
  if(session.applying)return;
@@ -550,6 +574,8 @@ function onPersist(){
  schedule();
 }
 async function disconnect(){
+ ++session.generation;
+ holdTimer();session.busy=false;session.pending=false;session.active=false;
  try{await forgetDeviceV22()}
  catch(e){return setNotice('تعذر إلغاء اتصال الجهاز المحفوظ: '+String(e.message||e))}
  holdTimer();
@@ -714,7 +740,7 @@ function openSettings(){
  });
 }
 E('financeSyncSettingsV19')?.addEventListener('click',openSettings);
-window.masareefiSyncV19={onPersist,openSettings,synchronize,stableStringify,classification,disconnect};
+window.masareefiSyncV19={onPersist,onBulkRestore,openSettings,synchronize,stableStringify,classification,disconnect};
 window.addEventListener('online',()=>{
  if(session.uid&&session.active)schedule();
  else if(!session.uid&&vaultMeta?.mode==='automatic')restoreAutomaticV22();
