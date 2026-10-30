@@ -6,6 +6,10 @@
 'use strict';
 const CONFIG_KEY='masareefi_finance_sync_v19';
 const LOCK_KEY='masareefi_finance_sync_v21_encrypted_unlock';
+const RESTORE_HOLD_KEY='masareefi_finance_sync_v23_restore_hold';
+const hasRestoreHold=()=>localStorage.getItem(RESTORE_HOLD_KEY)==='1';
+const setRestoreHold=()=>localStorage.setItem(RESTORE_HOLD_KEY,'1');
+const clearRestoreHold=()=>localStorage.removeItem(RESTORE_HOLD_KEY);
 const vault=()=>window.masareefiDeviceVaultV22||null;
 let vaultMeta=null;
 const CHUNK_SIZE=380000;
@@ -54,7 +58,7 @@ async function unlockSession(phrase){
  session.projectId=lock.projectId;session.apiKey=config.apiKey;session.email=lock.email;
  session.uid=lock.uid;session.idToken='';session.refreshToken=saved.refreshToken;
  session.expiry=0;session.phrase=phrase;session.remembered=true;
- session.base=readBase();session.active=!!session.base?.hash;
+ session.base=readBase();session.active=!!session.base?.hash&&!hasRestoreHold();
  try{await authToken()}
  catch(e){
   session.uid='';session.idToken='';session.refreshToken='';session.phrase='';session.active=false;
@@ -82,7 +86,7 @@ async function restoreDeviceConnection(secrets,mode){
  session.projectId=settings.projectId;session.apiKey=settings.apiKey;
  session.email=secrets.email;session.uid=secrets.uid;session.refreshToken=secrets.refreshToken;
  session.idToken='';session.expiry=0;session.phrase=secrets.phrase;
- session.base=readBase();session.active=!!session.base?.hash;
+ session.base=readBase();session.active=!!session.base?.hash&&!hasRestoreHold();
  session.deviceMode=mode||'';session.remembered=false;
  try{
   await authToken();
@@ -250,7 +254,7 @@ async function signIn(projectId,apiKey,email,password,phrase,rememberDevice=fals
  session.expiry=Date.now()+(Number(user.expiresIn)||3600)*1000;
  session.phrase=phrase;
  session.base=readBase();
- session.active=!!session.base?.hash;
+ session.active=!!session.base?.hash&&!hasRestoreHold();
  session.remembered=false;session.deviceMode='';
  saveConfig();
  try{await validateCloudPassphrase()}
@@ -349,6 +353,11 @@ function summaryV20(){
  const box=E('syncConnectionSummaryV20');
  if(!box)return;
  const msg=session.notice||'';
+ if(hasRestoreHold()){
+  box.dataset.syncState='conflict';
+  box.textContent='⚠ استعادة بيانات محلية: المزامنة التلقائية معلّقة حتى تُقرّر صراحةً رفع بيانات الجهاز أو استلام السحابة. سيبقى هذا الحاجز بعد إعادة فتح التطبيق.';
+  return;
+ }
  const kind=!session.uid?'offline':msg.includes('تعارض')||msg.includes('⚠')?'conflict':
   msg.startsWith('تعذرت')?'error':!session.active?'attention':
   msg.includes('جارٍ')?'syncing':msg.includes('بانتظار')?'pending':'connected';
@@ -505,6 +514,10 @@ async function uploadSnapshot(existing,epoch=session.generation){
 }
 async function synchronize(force,choice=''){
  if(!session.uid)return setNotice('سجّل الدخول أولًا إلى حساب المزامنة.');
+ if(hasRestoreHold()&&!choice){
+  session.active=false;
+  return setNotice('⚠ استُعيدت نسخة محلية من ملف أو إصدار سابق. المزامنة التلقائية معلّقة حتى بعد إعادة تشغيل التطبيق. احفظ نسخة احتياطية، ثم اختر «رفع بيانات هذا الجهاز» أو «استلام البيانات من السحابة» بقرار صريح.');
+ }
  if(session.busy)return;
  if(!navigator.onLine)return setNotice('لا يوجد اتصال حاليًا؛ بياناتك محفوظة على الجهاز. أعد الاتصال لإتمام المزامنة.');
  holdTimer();session.busy=true;const epoch=session.generation;setNotice('جارٍ التحقق من نسخة السحابة…');
@@ -517,10 +530,12 @@ async function synchronize(force,choice=''){
   if(choice==='upload'){
    if(!force)throw Error('الرفع الذي يستبدل النسخة السحابية يحتاج إلى تأكيد صريح.');
    await uploadSnapshot(remote,epoch);
+   if(epoch===session.generation)clearRestoreHold();
   }else if(choice==='download'){
    if(!remote)throw Error('لا توجد نسخة سحابية قابلة للتنزيل.');
    if(!force)throw Error('استبدال النسخة المحلية يحتاج إلى تأكيد صريح.');
    await adoptRemote(remote,false,epoch);
+   if(epoch===session.generation)clearRestoreHold();
   }else if(action==='equal'){
    saveBase({hash:localHash,revision:remote.revision,updateTime:remote.updateTime});
    session.active=true;setNotice('✓ البيانات متطابقة بين الجهاز والسحابة؛ المزامنة التلقائية مفعّلة أثناء فتح التطبيق.');
@@ -555,7 +570,8 @@ function schedule(){
  session.timer=setTimeout(()=>{session.timer=null;synchronize(false)},2400);
 }
 function onBulkRestore(){
- // A confirmed local JSON import/legacy transfer must NEVER silently replace the cloud.
+ // A confirmed local JSON import/legacy transfer must NEVER silently replace the cloud, even after restart.
+ setRestoreHold();
  ++session.generation;
  holdTimer();
  session.busy=false;session.active=false;session.pending=false;
