@@ -1,0 +1,38 @@
+name: Masareefi RC23 regression checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'cloud-sync.js'
+      - 'device-vault.js'
+      - 'sw.js'
+      - 'firestore.rules'
+      - 'tests/**'
+      - '.github/workflows/rc23-tests.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'cloud-sync.js'
+      - 'device-vault.js'
+      - 'sw.js'
+      - 'firestore.rules'
+      - 'tests/**'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout test repository
+        uses: actions/checkout@v4
+      - name: Install Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run RC23 source and quarantine regressions
+        run: node --test tests/rc23.test.mjs
