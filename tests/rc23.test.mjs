@@ -22,7 +22,7 @@ test('JavaScript sources and all inline scripts parse',()=>{
   assert.doesNotThrow(()=>new vm.Script(match[1]));
 });
 test('payday budget cycles use configured dates without moving transaction dates',()=>{
- const module=app.match(/<script id="payday-cycle-module">([\\s\\S]*?)<\\/script>/);
+ const module=app.match(/<script id="payday-cycle-module">([\s\S]*?)<\/script>/);
  assert.ok(module,'payday cycle module missing');
  const window={};
  vm.runInNewContext(module[1],{window});
