@@ -21,6 +21,23 @@ test('JavaScript sources and all inline scripts parse',()=>{
  for(const match of app.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi))
   assert.doesNotThrow(()=>new vm.Script(match[1]));
 });
+test('payday budget cycles use configured dates without moving transaction dates',()=>{
+ const module=app.match(/<script id="payday-cycle-module">([\\s\\S]*?)<\\/script>/);
+ assert.ok(module,'payday cycle module missing');
+ const window={};
+ vm.runInNewContext(module[1],{window});
+ const cycle=window.masareefiPaydayCycle;
+ assert.equal(cycle.currentEndMonth('2026-11-02',27),'2026-11');
+ assert.equal(cycle.currentEndMonth('2026-11-27',27),'2026-12');
+ assert.deepEqual(JSON.parse(JSON.stringify(cycle.forEndMonth('2026-11',27))),{start:'2026-10-27',end:'2026-11-27'});
+ assert.deepEqual(JSON.parse(JSON.stringify(cycle.forEndMonth('2026-03',31))),{start:'2026-02-28',end:'2026-03-31'});
+});
+test('payday defaults to day 27 and can be configured from settings',()=>{
+ assert.match(app,/paydayDay:27/);
+ assert.match(app,/id="paydaySettings"/);
+ assert.match(app,/id="paydayDaySelect"/);
+ assert.match(app,/d\.paydayDay<1\|\|d\.paydayDay>31/);
+});
 test('RC23 uses original financial key and isolated user-specific Firestore',()=>{
  assert.ok(app.includes("const KEY='"+localKey+"'"));
  assert.match(cloud,/masareefi_finance_sync_v19/);
