@@ -327,7 +327,8 @@ body.entry-v13-open{overflow:hidden}
     <strong class="v12-net" id="headNet">0 ر.س</strong>
     <div class="monthbar v12-monthbar" aria-label="اختيار الشهر">
       <button type="button" id="monthNext" aria-label="الشهر التالي">‹</button>
-      <input id="month" type="month" aria-label="الشهر المحدد">
+      <input id="month" type="month" aria-label="شهر نهاية دورة الراتب">
+      <small id="payPeriodLabel" style="display:block;text-align:center;margin-top:6px;color:#fff;opacity:.86;font-size:12px"></small>
       <button type="button" id="monthPrev" aria-label="الشهر السابق">›</button>
     </div>
   </div>
@@ -386,7 +387,7 @@ body.entry-v13-open{overflow:hidden}
 <section class="page" id="p-transactions"><div class="screenhead"><h2>الدخل والمصروفات</h2><button class="btn secondary" data-open-entry="expense">＋ إضافة</button></div><div class="pills"><button class="pill active" data-filter="all">الكل</button><button class="pill" data-filter="income">الدخل</button><button class="pill" data-filter="expense">المصروفات</button></div><div class="card" id="allTransactions"></div></section>
 <section class="page" id="p-savings"><div class="screenhead"><h2>حساب الادخار</h2><button class="btn secondary" id="addAccountBtn">＋ حساب</button></div><div class="card"><div class="hint">مدخراتي (المبالغ الموجودة في الحسابات)</div><div id="savingsTotal" class="moneybig"></div><div class="finance-divider"></div><div class="finance-amount-row"><span>مستحقاتي غير المحصلة</span><strong id="savingsOwedTotal"></strong></div><div class="finance-divider"></div><div class="finance-total-label">إجمالي المدخرات والمستحقات</div><div id="savingsCombinedTotal" class="moneybig"></div><div class="hint">المجموع = أرصدة الادخار + المبالغ المستحقة لك. المستحقات ليست نقدًا متاحًا قبل تحصيلها.</div></div><div class="sectionbar"><h2>حساباتي</h2></div><div class="card" id="accountsList"></div><div class="mini-actions"><button id="depositBtn">＋ إيداع</button><button id="withdrawBtn">− سحب</button><button id="transferBtn">⇄ تحويل</button></div><div class="sectionbar"><h2>سجل الادخار</h2></div><div class="card" id="savingHistory"></div></section>
 <section class="page" id="p-receivables"><div class="screenhead"><h2>مبالغ مستحقة لي</h2><button class="btn secondary" id="addReceivableBtn">＋ دين</button></div><div class="card"><div class="hint">إجمالي المبالغ المستحقة لك وغير المحصلة</div><div class="moneybig" id="owedTotal"></div><div class="finance-divider"></div><div class="finance-amount-row"><span>المدخرات الحالية</span><strong id="receivablesSavingsTotal"></strong></div><div class="finance-amount-row finance-overall"><span>إجمالي المدخرات والمستحقات</span><strong id="receivablesCombinedTotal"></strong></div></div><div class="card" id="receivablesList"></div></section>
-<section class="page" id="p-budget"><div class="screenhead"><h2>الميزانية الشهرية</h2></div><div class="card"><div class="field"><label>تصنيف المصروف</label><select id="budgetCategory"></select></div><div class="field"><label>الحد الشهري (ريال)</label><input type="number" min="0.01" step="0.01" id="budgetAmount"></div><button class="btn" id="setBudget">حفظ الحد</button></div><div class="card" id="budgetList"></div></section>
+<section class="page" id="p-budget"><div class="screenhead"><h2>ميزانية دورة الراتب</h2></div><div class="card"><div class="field"><label>تصنيف المصروف</label><select id="budgetCategory"></select></div><div class="field"><label>الحد للدورة (ريال)</label><input type="number" min="0.01" step="0.01" id="budgetAmount"></div><button class="btn" id="setBudget">حفظ الحد</button></div><div class="card" id="budgetList"></div></section>
 <section class="page" id="p-goals"><div class="screenhead"><h2>أهداف الادخار</h2><button class="btn secondary" id="addGoalBtn">＋ هدف</button></div><div class="card" id="goalsList"></div></section>
 <section class="page" id="p-debts"><div class="screenhead"><h2>الأقساط والديون</h2><button class="btn secondary" id="addDebtBtn">＋ التزام</button></div><div class="card" id="debtsList"></div></section>
 <section class="page" id="p-reports"><div class="screenhead"><h2>التقارير والتحليل</h2></div>
@@ -394,7 +395,7 @@ body.entry-v13-open{overflow:hidden}
 <div id="reportSummaryArea"><div class="card"><div class="triplet" style="box-shadow:none"><div><strong id="reportExp">0</strong><small>المصروفات</small></div><div><strong id="reportInc">0</strong><small>الدخل</small></div><div><strong id="reportNet">0</strong><small>المتبقي</small></div></div><h3>المصروفات حسب التصنيف</h3><div id="reportCats"></div>
 <div class="report-donut" id="reportDonut" aria-label="توزيع الدخل والمصروفات"></div>
 <div id="reportLegend" class="report-legend"></div></div>
-<div class="card"><h3>مقارنة آخر 6 أشهر</h3><div class="monthly-chart" id="reportMonthly"></div></div>
+<div class="card"><h3>مقارنة آخر 6 دورات راتب</h3><div class="monthly-chart" id="reportMonthly"></div></div>
 </div><div id="reportDetailArea" hidden>
 <div class="card"><h3>أكثر البنود صرفًا</h3><div id="reportTopCats"></div></div>
 <div class="card"><h3>تحليل الأشهر</h3><div id="reportMonthsTable"></div></div>
@@ -402,14 +403,14 @@ body.entry-v13-open{overflow:hidden}
 
 <section class="page" id="p-incomeLedger">
  <div class="screenhead"><h2>سجل الدخل</h2><button class="btn secondary" data-open-entry="income">＋ دخل</button></div>
- <div class="card"><div class="hint">إجمالي دخل الشهر المحدد</div><div class="moneybig" id="incomeLedgerTotal">0</div></div>
+ <div class="card"><div class="hint">إجمالي دخل دورة الراتب المحددة</div><div class="moneybig" id="incomeLedgerTotal">0</div></div>
  <div class="sectionbar"><h2>العمليات الواردة</h2></div><div class="card" id="incomeLedgerRows"></div>
  <div class="sectionbar"><h2>الدخل المتكرر</h2><button class="btn secondary" id="addRecurring">＋ دخل متكرر</button></div>
  <div class="card" id="recurringList"></div>
  <div class="notice">يُسجّل الدخل المتكرر في تاريخ استحقاقه عند فتح التطبيق في ذلك اليوم أو بعده. لن تُنشأ العملية مرتين للشهر نفسه.</div>
 </section>
 <section class="page" id="p-settings"><div class="screenhead"><h2>الإعدادات</h2></div><p class="v12-version">مصاريفي 2.0 · الإصدار التجريبي 23 — مرشح الإطلاق — توضيح حالة مزامنة الأجهزة</p><div class="notice" style="margin-bottom:12px">اختر أحد الإعدادات التالية. كل خيار يفتح شاشة أو نافذة يمكن استخدامها مباشرة.</div><div class="card settingslist"><button class="settingsitem" id="manageCategories">التصنيفات الرئيسية والفرعية <span>‹</span></button><button class="settingsitem" id="merchantLogosSettingsV17" type="button">🏷️ شعارات المتاجر والجهات <span>‹</span></button>
-<button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button>
+<button class="settingsitem" id="themeColors">لون التطبيق <span>‹</span></button><button class="settingsitem" id="paydaySettings" type="button">موعد الراتب ودورة الميزانية <span id="paydaySettingSummary">يوم 27 · تعديل</span></button>
 <button class="settingsitem" id="smartPasteSettingsOpen" type="button">📋 لصق الرسائل البنكية الذكي <span>‹</span></button><button class="settingsitem" id="shortcutHelpV16" type="button">📩 ربط رسائل البنك باختصارات الآيفون <span>‹</span></button>
 <button class="settingsitem" data-go="incomeLedger">سجل الدخل والراتب المتكرر <span>‹</span></button><button class="settingsitem" data-go="receipts">أرشيف الفواتير <span>‹</span></button><button class="settingsitem" data-go="backup">النسخ الاحتياطي اليدوي <span>‹</span></button><button class="settingsitem" id="financeSyncSettingsV19" type="button">☁ المزامنة المالية بين الأجهزة <span>‹</span></button><div id="syncConnectionSummaryV20" class="sync-summary-v20" role="status" aria-live="polite">جارٍ فحص حالة المزامنة...</div><button class="settingsitem" data-go="budget">الميزانية <span>‹</span></button><button class="settingsitem" data-go="debts">الأقساط والديون <span>‹</span></button><button class="settingsitem" data-go="goals">الأهداف الادخارية <span>‹</span></button><button class="settingsitem" data-go="reports">التقارير <span>‹</span></button></div><div class="notice">البيانات محفوظة في هذا المتصفح. أنشئ نسخة JSON في Google Drive أو iCloud Drive يدويًا بانتظام. يمكن تفعيل المزامنة المالية المشفرة من الإعدادات؛ تعمل أثناء فتح التطبيق وبعد تسجيل الدخول.</div></section>
 <section class="page" id="p-receipts"><div class="screenhead"><h2>أرشيف الفواتير</h2></div>
@@ -492,23 +493,50 @@ body.entry-v13-open{overflow:hidden}
   <div class="smart-actions"><button class="btn" type="submit">تأكيد وحفظ العملية</button><button type="button" class="btn outline" id="smartPasteCancel">إلغاء</button></div>
  </form>
 </dialog>
+<script id="payday-cycle-module">
+(function(global){
+ 'use strict';
+ const pad=value=>String(value).padStart(2,'0');
+ function dateForPayday(year,monthIndex,day){
+  const safeDay=Math.max(1,Math.min(31,Number(day)||27));
+  const actual=Math.min(safeDay,new Date(year,monthIndex+1,0).getDate());
+  return year+'-'+pad(monthIndex+1)+'-'+pad(actual);
+ }
+ function shiftMonth(month,delta){const [year,number]=month.split('-').map(Number);const date=new Date(year,number-1+delta,1);return date.getFullYear()+'-'+pad(date.getMonth()+1)}
+ function forEndMonth(endMonth,day){
+  const [year,number]=endMonth.split('-').map(Number),prev=new Date(year,number-2,1);
+  return {start:dateForPayday(prev.getFullYear(),prev.getMonth(),day),end:dateForPayday(year,number-1,day)};
+ }
+ function currentEndMonth(date,day){
+  const current=String(date).slice(0,7),[year,number]=current.split('-').map(Number);
+  return String(date).slice(0,10)<dateForPayday(year,number-1,day)?current:shiftMonth(current,1);
+ }
+ function label(endMonth,day){
+  const period=forEndMonth(endMonth,day),endParts=period.end.split('-').map(Number),last=new Date(endParts[0],endParts[1]-1,endParts[2]-1),[sy,sm,sd]=period.start.split('-').map(Number),start=new Date(sy,sm-1,sd);
+  const startText=start.toLocaleDateString('ar-SA',{day:'numeric',month:'long'}),endText=last.toLocaleDateString('ar-SA',{day:'numeric',month:'long',year:'numeric'});
+  return 'دورة الراتب: '+startText+' – '+endText;
+ }
+ global.masareefiPaydayCycle={dateForPayday,forEndMonth,currentEndMonth,shiftMonth,label};
+})(window);
+</script>
 <script>
 'use strict';
 const KEY='masareefi_v2_review_20261028_isolated',types=['income','expense'];
 const defaultCategories={income:['راتب','عمل إضافي','هدية','مكافأة','استرداد','أخرى'],expense:['غذاء ومقاضي','السكن والفواتير','النقل والسيارة','الصحة','التعليم','التسوق','ترفيه','أقساط وديون','أخرى']};
-const fresh=()=>({transactions:[],goals:[],debts:[],budgets:{},savings:[],receivables:[],savingAccounts:[{id:'bank',name:'حساب بنكي',type:'bank'},{id:'cash',name:'كاش',type:'cash'}],customCategories:{income:[],expense:[]},hiddenCategories:{income:[],expense:[]},categoryTree:null,themeColor:'#66c92e',recurringIncome:[],merchantLogoRulesV17:{},logoInternetEnabledV18:false});
-function hydrate(raw){const clean=raw&&typeof raw==='object'&&!Array.isArray(raw)?{...raw}:{};delete clean._receiptBackup;let d={...fresh(),...clean};for(const name of ['transactions','goals','debts','savings','receivables'])if(!Array.isArray(d[name]))d[name]=[];if(!d.budgets||typeof d.budgets!=='object')d.budgets={};if(!Array.isArray(d.savingAccounts)||!d.savingAccounts.length)d.savingAccounts=fresh().savingAccounts;if(!Array.isArray(d.recurringIncome))d.recurringIncome=[];if(!d.merchantLogoRulesV17||typeof d.merchantLogoRulesV17!=='object'||Array.isArray(d.merchantLogoRulesV17))d.merchantLogoRulesV17={};if(typeof d.themeColor!=='string')d.themeColor='#66c92e';if(typeof d.logoInternetEnabledV18!=='boolean')d.logoInternetEnabledV18=false;for(const group of ['customCategories','hiddenCategories']){if(!d[group]||typeof d[group]!=='object')d[group]={};for(const type of types)if(!Array.isArray(d[group][type]))d[group][type]=[]}return d}
+const fresh=()=>({transactions:[],goals:[],debts:[],budgets:{},savings:[],receivables:[],savingAccounts:[{id:'bank',name:'حساب بنكي',type:'bank'},{id:'cash',name:'كاش',type:'cash'}],customCategories:{income:[],expense:[]},hiddenCategories:{income:[],expense:[]},categoryTree:null,themeColor:'#66c92e',recurringIncome:[],merchantLogoRulesV17:{},logoInternetEnabledV18:false,paydayDay:27});
+function hydrate(raw){const clean=raw&&typeof raw==='object'&&!Array.isArray(raw)?{...raw}:{};delete clean._receiptBackup;let d={...fresh(),...clean};for(const name of ['transactions','goals','debts','savings','receivables'])if(!Array.isArray(d[name]))d[name]=[];if(!d.budgets||typeof d.budgets!=='object')d.budgets={};if(!Array.isArray(d.savingAccounts)||!d.savingAccounts.length)d.savingAccounts=fresh().savingAccounts;if(!Array.isArray(d.recurringIncome))d.recurringIncome=[];if(!d.merchantLogoRulesV17||typeof d.merchantLogoRulesV17!=='object'||Array.isArray(d.merchantLogoRulesV17))d.merchantLogoRulesV17={};if(typeof d.themeColor!=='string')d.themeColor='#66c92e';if(typeof d.logoInternetEnabledV18!=='boolean')d.logoInternetEnabledV18=false;if(!Number.isInteger(d.paydayDay)||d.paydayDay<1||d.paydayDay>31)d.paydayDay=27;for(const group of ['customCategories','hiddenCategories']){if(!d[group]||typeof d[group]!=='object')d[group]={};for(const type of types)if(!Array.isArray(d[group][type]))d[group][type]=[]}return d}
 function readStorage(){try{return hydrate(JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return hydrate({})}}
 let data=readStorage(),page='home',filter='all',quickType='expense',categoryType='expense';
 const el=id=>document.getElementById(id),txt=(id,v)=>{if(el(id))el(id).textContent=v},today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')},money=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:2})+' ر.س',amt=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:2}),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let month=today().slice(0,7);el('month').value=month;
+const paydayCycle=window.masareefiPaydayCycle;
+let month=paydayCycle.currentEndMonth(today(),data.paydayDay);el('month').value=month;
 const id=()=>String(Date.now())+'-'+Math.random().toString(36).slice(2,9),n=v=>Number(v)||0;
 function persist(){localStorage.setItem(KEY,JSON.stringify(data));render();window.masareefiSyncV19?.onPersist?.()}
-// Display transactions by their transaction date (newest first), not when entered.
-// Sort only the filtered copy; never reorder stored records or rewrite dates.
+// Keep transaction dates unchanged; use a pay-date window for budget and income totals.
 function monthTransactions(){
+ const period=paydayCycle.forEndMonth(month,data.paydayDay);
  return data.transactions
-   .filter(t=>String(t.date||'').startsWith(month))
+   .filter(t=>{const date=String(t.date||'').slice(0,10);return date>=period.start&&date<period.end})
    .sort((a,b)=>{
      const da=String(a.date||'').slice(0,10),db=String(b.date||'').slice(0,10);
      return da===db?0:(da<db?1:-1);
@@ -762,7 +790,7 @@ function txRows(list){
 }
 function accountLabel(id){return data.savingAccounts.find(a=>a.id===id)?.name||id}
 function rowEmpty(label){return `<div class="empty">${label}</div>`}
-function render(){const transactions=monthTransactions(),inc=sum(transactions,'income'),exp=sum(transactions,'expense'),net=inc-exp,saved=savingTotal(),owed=owedTotal();txt('homeOwed',money(owed));txt('headNet',money(net));txt('headSaving',money(saved));txt('sumExpense',amt(exp));txt('sumIncome',amt(inc));txt('sumNet',amt(net));txt('allFunds',money(saved+owed));txt('savingsOwedTotal',money(owed));txt('savingsCombinedTotal',money(saved+owed));txt('receivablesSavingsTotal',money(saved));txt('receivablesCombinedTotal',money(saved+owed));el('homeTransactions').innerHTML=txRows(transactions.slice(0,8));el('allTransactions').innerHTML=txRows((filter==='all'?transactions:transactions.filter(x=>x.type===filter)));txt('savingsTotal',money(saved));txt('owedTotal',money(owed));txt('reportExp',amt(exp));txt('reportInc',amt(inc));txt('reportNet',amt(net));
+function render(){const transactions=monthTransactions(),inc=sum(transactions,'income'),exp=sum(transactions,'expense'),net=inc-exp,saved=savingTotal(),owed=owedTotal();txt('payPeriodLabel',paydayCycle.label(month,data.paydayDay));txt('paydaySettingSummary','يوم '+data.paydayDay+' · تعديل');txt('homeOwed',money(owed));txt('headNet',money(net));txt('headSaving',money(saved));txt('sumExpense',amt(exp));txt('sumIncome',amt(inc));txt('sumNet',amt(net));txt('allFunds',money(saved+owed));txt('savingsOwedTotal',money(owed));txt('savingsCombinedTotal',money(saved+owed));txt('receivablesSavingsTotal',money(saved));txt('receivablesCombinedTotal',money(saved+owed));el('homeTransactions').innerHTML=txRows(transactions.slice(0,8));el('allTransactions').innerHTML=txRows((filter==='all'?transactions:transactions.filter(x=>x.type===filter)));txt('savingsTotal',money(saved));txt('owedTotal',money(owed));txt('reportExp',amt(exp));txt('reportInc',amt(inc));txt('reportNet',amt(net));
  el('accountsList').innerHTML=data.savingAccounts.map(a=>`<div class="accountrow"><span class="circle">${a.type==='cash'?'▣':'⌂'}</span><div class="rowmain"><b>${safe(a.name)}</b><small>${a.type==='cash'?'نقدي':'بنكي'}</small></div><strong class="value">${amt(savingAccountTotal(a.id))}</strong><button class="subtlelink" data-action="editAccount" data-id="${safe(a.id)}">⋯</button></div>`).join('');
  el('savingHistory').innerHTML=data.savings.length?data.savings.slice().reverse().slice(0,70).map(x=>`<div class="txrow"><span class="circle">⇄</span><div class="rowmain"><b>${safe(({deposit:'إيداع',withdrawal:'سحب',transfer:'تحويل',collection:'تحصيل دين إلى الادخار'})[x.type]||x.type)}</b><small>${safe(accountLabel(x.account||'bank'))}${x.toAccount?' ← '+safe(accountLabel(x.toAccount)):''} · ${safe(x.date)}</small><small>${safe(x.note||'')}</small></div><b class="value">${amt(x.amount)}</b></div>`).join(''):rowEmpty('لا توجد حركات ادخار');
  el('receivablesList').innerHTML=data.receivables.length?data.receivables.map(r=>`<div class="listrow"><div class="rowmain"><b>${safe(r.name)}</b><small>تاريخ الدين: ${safe(r.debtDate||'غير محدد')}</small><small>الأصل ${money(r.amount)} · المتبقي ${money(r.remaining)}</small></div><div class="actions"><button class="btn secondary" data-action="collect" data-id="${safe(r.id)}" ${n(r.remaining)<=0?'disabled':''}>تحصيل ← الادخار</button><button class="btn danger" data-action="deleteReceivable" data-id="${safe(r.id)}">حذف</button></div></div>`).join(''):rowEmpty('ليس لديك مبالغ مستحقة مسجلة');
@@ -1244,6 +1272,13 @@ function reportUpdate(transactions,inc,exp,net){
  </div><small>${safe(x.month)}</small></div>`).join('');
  el('reportMonthsTable').innerHTML=months.slice().reverse().map(x=>`<div class="report-table-row"><b>${safe(x.key)}</b><span style="color:var(--green-dark)">+${amt(x.income)}</span><span style="color:#b64f46">−${amt(x.expense)}</span></div>`).join('');
 }
+function paydaySettings(){
+ const options=Array.from({length:31},(_,i)=>{const day=i+1;return '<option value="'+day+'" '+(day===data.paydayDay?'selected':'')+'>'+day+'</option>'}).join('');
+ openModal('موعد الراتب ودورة الميزانية',
+  '<p class="notice">تبدأ دورة الميزانية في يوم الراتب وتستمر حتى اليوم السابق لموعد الراتب التالي. إذا كان الموعد 27، فالدورة من 27 إلى 26. تغيير الموعد لا يغيّر تواريخ العمليات أو الدخل المتكرر.</p><div class="field"><label for="paydayDaySelect">يوم نزول الراتب</label><select id="paydayDaySelect">'+options+'</select></div><button type="button" class="btn" id="savePaydayDay">حفظ موعد الراتب</button>',
+  ()=>{el('savePaydayDay').onclick=()=>{const day=Number(el('paydayDaySelect').value);if(!Number.isInteger(day)||day<1||day>31){alert('اختر يومًا من 1 إلى 31');return}data.paydayDay=day;month=paydayCycle.currentEndMonth(today(),day);el('month').value=month;el('modal').close();persist()}}
+ );
+}
 function renderExtra(transactions,inc,exp,net){
  txt('incomeLedgerTotal',money(inc));
  el('incomeLedgerRows').innerHTML=txRows(transactions.filter(t=>t.type==='income'));
@@ -1254,7 +1289,7 @@ function renderExtra(transactions,inc,exp,net){
  reportUpdate(transactions,inc,exp,net)
 }
 function initExtra(){
- ensureTree();upgradeCategoryTreeV7();upgradeCategoryOrderV8();applyTheme();recurringCheck();
+ ensureTree();upgradeCategoryTreeV7();upgradeCategoryOrderV8();applyTheme();recurringCheck();el('paydaySettings').onclick=paydaySettings;
  el('categoryPickerBtn').onclick=()=>treeModal(quickType,'pick');
  el('themeColors').onclick=themePicker;
  el('addRecurring').onclick=createRecurring;
