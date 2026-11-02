@@ -513,7 +513,7 @@ body.entry-v13-open{overflow:hidden}
  }
  function label(endMonth,day){
   const period=forEndMonth(endMonth,day),endParts=period.end.split('-').map(Number),last=new Date(endParts[0],endParts[1]-1,endParts[2]-1),[sy,sm,sd]=period.start.split('-').map(Number),start=new Date(sy,sm-1,sd);
-  const startText=start.toLocaleDateString('ar-SA',{day:'numeric',month:'long'}),endText=last.toLocaleDateString('ar-SA',{day:'numeric',month:'long',year:'numeric'});
+  const startText=start.toLocaleDateString('ar-SA',{day:'numeric',month:'long',year:'numeric'}),endText=last.toLocaleDateString('ar-SA',{day:'numeric',month:'long',year:'numeric'});
   return 'دورة الراتب: '+startText+' – '+endText;
  }
  global.masareefiPaydayCycle={dateForPayday,forEndMonth,currentEndMonth,shiftMonth,label};
