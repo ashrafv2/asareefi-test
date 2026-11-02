@@ -2,7 +2,7 @@ name: Masareefi RC23 regression checks
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'feature/**']
     paths:
       - 'index.html'
       - 'cloud-sync.js'
