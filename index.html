@@ -1257,20 +1257,20 @@ function reportUpdate(transactions,inc,exp,net){
  donut.innerHTML=`<div class="report-donut-center"><span>${amt(exp)}<br><small>المصروفات</small></span></div>`;
  legend.innerHTML=sorted.map(([name,value],i)=>`<span><i style="background:${expenseColors[i%expenseColors.length]}"></i>${safe(name)} ${Math.round(value/exp*100)}%</span>`).join('')||'لا توجد مصروفات للشهر';
  top.innerHTML=sorted.map(([name,value],i)=>`<div class="report-table-row"><b>${safe(name)}</b><span>${money(value)}</span><span>${Math.round(value/exp*100)}%</span></div>`).join('')||'<div class="empty">لا توجد مصروفات بعد</div>';
- const [y,m]=month.split('-').map(Number),months=[];
+ const months=[];
  for(let offset=5;offset>=0;offset--){
-  const d=new Date(y,m-1-offset,1);
-  const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-  const rows=data.transactions.filter(t=>String(t.date||'').startsWith(key));
+  const key=paydayCycle.shiftMonth(month,-offset),period=paydayCycle.forEndMonth(key,data.paydayDay);
+  const d=new Date(Number(key.slice(0,4)),Number(key.slice(5))-1,1);
+  const rows=data.transactions.filter(t=>{const date=String(t.date||'').slice(0,10);return date>=period.start&&date<period.end});
   const income=sum(rows,'income'),expense=sum(rows,'expense');
-  months.push({key,month:d.toLocaleDateString('ar-SA',{month:'short'}),income,expense})
+  months.push({key,range:paydayCycle.label(key,data.paydayDay).replace('دورة الراتب: ',''),month:d.toLocaleDateString('ar-SA',{month:'short'}),income,expense})
  }
  const maximum=Math.max(1,...months.flatMap(x=>[x.income,x.expense]));
  el('reportMonthly').innerHTML=months.map(x=>`<div class="monthcol"><div class="monthbars">
  <i style="height:${Math.max(2,x.income/maximum*105)}px;background:var(--green)"></i>
  <i style="height:${Math.max(2,x.expense/maximum*105)}px;background:#d96760"></i>
  </div><small>${safe(x.month)}</small></div>`).join('');
- el('reportMonthsTable').innerHTML=months.slice().reverse().map(x=>`<div class="report-table-row"><b>${safe(x.key)}</b><span style="color:var(--green-dark)">+${amt(x.income)}</span><span style="color:#b64f46">−${amt(x.expense)}</span></div>`).join('');
+ el('reportMonthsTable').innerHTML=months.slice().reverse().map(x=>`<div class="report-table-row"><b>${safe(x.range)}</b><span style="color:var(--green-dark)">+${amt(x.income)}</span><span style="color:#b64f46">−${amt(x.expense)}</span></div>`).join('');
 }
 function paydaySettings(){
  const options=Array.from({length:31},(_,i)=>{const day=i+1;return '<option value="'+day+'" '+(day===data.paydayDay?'selected':'')+'>'+day+'</option>'}).join('');
