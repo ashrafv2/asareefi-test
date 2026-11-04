@@ -479,11 +479,12 @@ body.entry-v13-open{overflow:hidden}
 
 <dialog id="smartPasteDialog" class="smart-paste-dialog" aria-labelledby="smartPasteTitle" dir="rtl">
  <div class="smart-paste-header"><strong id="smartPasteTitle">📋 لصق رسالة بنكية</strong><button type="button" id="smartPasteClose" aria-label="إغلاق">✕</button></div>
- <p class="smart-help">انسخ رسالة البنك ثم اضغط «لصق» أو ضع النص يدويًا. راجع كل حقل قبل الحفظ؛ لن تُحفظ الرسالة تلقائيًا.</p>
- <div class="smart-actions"><button class="btn secondary" type="button" id="smartPasteClipboard">لصق من الحافظة</button><button class="btn outline" type="button" id="smartPasteAnalyze">تحليل الرسالة</button></div>
+ <p class="smart-help">انسخ رسالة البنك ثم اضغط «لصق» أو ضع النص يدويًا. للصق عدة رسائل، اترك سطرًا فارغًا بين كل رسالة. راجع النتائج قبل الحفظ.</p>
+ <div class="smart-actions"><button class="btn secondary" type="button" id="smartPasteClipboard">لصق من الحافظة</button><button class="btn outline" type="button" id="smartPasteAnalyze">تحليل الرسالة</button><button class="btn outline" type="button" id="smartPasteAnalyzeBatch">تحليل المجموعة</button></div>
  <label class="smart-label" for="smartPasteRaw">نص الرسالة</label>
  <textarea id="smartPasteRaw" rows="4" dir="auto" placeholder="مثال: عملية شراء بمبلغ 125.50 ريال من متجر بتاريخ 28/10/2026"></textarea>
  <div id="smartPasteStatus" class="smart-paste-status" role="status" aria-live="polite">لا يُحفظ أي شيء قبل مراجعتك.</div>
+ <div id="smartPasteBatchResults" class="smart-paste-batch-results" hidden></div>
  <form id="smartPasteForm">
   <div class="smart-form-row"><label>نوع العملية<select id="smartPasteType"><option value="expense">مصروف</option><option value="income">دخل</option></select></label><label>المبلغ (ر.س)<input id="smartPasteAmount" type="number" step="0.01" min="0.01" inputmode="decimal" required></label></div>
   <label>التصنيف<select id="smartPasteCategory" required></select></label>
@@ -1610,13 +1611,20 @@ body:has(select:focus) #entryLauncher { display:none!important; }
 .smart-paste-dialog textarea{min-height:100px;line-height:1.65;resize:vertical}
 .smart-form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .smart-paste-status{font-size:12px;background:#f0f8ee;color:#355a3a;padding:10px;border-radius:10px;line-height:1.7}
+.smart-paste-batch-results{display:grid;gap:10px;margin-top:12px}
+.smart-paste-batch-card{border:1px solid #d2dfd3;border-radius:14px;padding:10px;background:#fbfdfb}
+.smart-paste-batch-card.is-invalid{border-color:#e6b4a9;background:#fff9f7}
+.smart-paste-batch-card .smart-form-row{margin-top:0}
+.smart-paste-batch-card small{display:block;color:#65766a;line-height:1.5;margin-bottom:6px}
+.smart-paste-batch-card input,.smart-paste-batch-card select{min-height:40px;font-size:14px}
+.smart-paste-batch-save{margin-top:10px;width:100%}
 #smartPasteEntryOpen{flex:0 0 auto!important;min-width:65px!important;font-size:12px!important}
 @media(max-width:430px){.smart-paste-dialog{padding:13px;max-height:83dvh}.smart-paste-dialog .btn{font-size:13px}.smart-form-row{gap:7px}}
 </style><script id="smart-paste-2-script">
 (function(){
 'use strict';
 const e=id=>document.getElementById(id);
-const dialog=e('smartPasteDialog'),raw=e('smartPasteRaw'),status=e('smartPasteStatus');
+const dialog=e('smartPasteDialog'),raw=e('smartPasteRaw'),status=e('smartPasteStatus'),batchResults=e('smartPasteBatchResults');
 if(!dialog||!raw)return;
 const symbols=/^(?:SAR|ر\.?\s*س\.?|ريال(?:\s*سعودي)?|﷼)$/i;
 function smsFingerprintV16(message){
@@ -1714,19 +1722,77 @@ function guessCategory(text,type){
  for(const words of groups){if(words.some(w=>text.toLowerCase().includes(w.toLowerCase()))){const candidate=opts.find(o=>o.includes(words[0])||words.some(w=>o.toLowerCase().includes(w.toLowerCase())));if(candidate)return candidate}}
  return opts[0]||'';
 }
-function analyze(){
- const txt=normalize(raw.value).replace(/\s+/g,' ').trim();
- if(!txt){status.textContent='الصق نص الرسالة أولاً.';return}
+function parseMessage(message){
+ const txt=normalize(message).replace(/\s+/g,' ').trim();
  const isOutgoing=/(?:شراء|نقاط\s*بيع|خصم|سحب|حوالة\s*صادرة|تحويل\s*صادر|مدين|paid|purchase|debit)/i.test(txt);
  const isIncoming=/(?:راتب|إيداع|حوالة\s*واردة|تحويل\s*وارد|دائن|received|credited|salary|deposit)/i.test(txt);
- e('smartPasteType').value=isIncoming&&!isOutgoing?'income':'expense';categories();
- const amount=findAmount(txt);e('smartPasteAmount').value=amount===null?'':String(amount);
- e('smartPasteDate').value=findDate(txt)||today();
- e('smartPasteCategory').value=guessCategory(txt,e('smartPasteType').value);
- const merchant=findMerchant(raw.value);
+ const type=isIncoming&&!isOutgoing?'income':'expense';
+ const amount=findAmount(txt),date=findDate(txt)||today(),merchant=findMerchant(message);
+ const options=catOptions(type)||[],guessed=guessCategory(txt,type);
+ return {message,type,amount,date,category:options.includes(guessed)?guessed:(options[0]||''),note:merchant||'عملية بنكية',sourceKey:'sms-v1:'+smsFingerprintV16(txt.replace(/\s+/g,' ').toLowerCase())};
+}
+function splitMessages(value){
+ const normalized=String(value||'').replace(/\r/g,'').trim();
+ if(!normalized)return [];
+ const blocks=normalized.split(/\n\s*\n+/).map(x=>x.trim()).filter(Boolean);
+ if(blocks.length>1)return blocks;
+ const lines=normalized.split('\n');let out=[],current=[];
+ for(const line of lines){
+  if(current.length&&/^(?:شراء\s*[-–—]?\s*POS|POS\s*[-–—]?\s*شراء|راتب|حوالة\s+(?:واردة|صادرة)|تحويل\s+(?:وارد|صادر))/i.test(line.trim())){out.push(current.join('\n').trim());current=[]}
+  current.push(line);
+ }
+ if(current.length)out.push(current.join('\n').trim());
+ return out.filter(Boolean);
+}
+function batchOptionValues(type,selected){return (catOptions(type)||[]).map(x=>`<option value="${safe(x)}" ${x===selected?'selected':''}>${safe(x)}</option>`).join('')}
+function renderBatch(items){
+ batchResults.innerHTML=items.map((item,index)=>`<div class="smart-paste-batch-card ${item.amount===null||!item.category?'is-invalid':''}" data-batch-index="${index}" data-batch-source="${safe(item.sourceKey)}">
+  <label><input type="checkbox" data-batch-include checked> تضمين هذه الرسالة</label>
+  <small>${safe(item.message.slice(0,180))}${item.message.length>180?'…':''}</small>
+  <div class="smart-form-row"><label>النوع<select data-batch-type><option value="expense" ${item.type==='expense'?'selected':''}>مصروف</option><option value="income" ${item.type==='income'?'selected':''}>دخل</option></select></label><label>المبلغ<input data-batch-amount type="number" step="0.01" min="0.01" value="${item.amount===null?'':item.amount||''}"></label></div>
+  <label>التصنيف<select data-batch-category>${batchOptionValues(item.type,item.category)}</select></label>
+  <label>التاريخ<input data-batch-date type="date" value="${safe(item.date)}"></label>
+  <label>الوصف<input data-batch-note maxlength="160" value="${safe(item.note)}"></label>
+ </div>`).join('')+`<button type="button" class="btn smart-paste-batch-save" id="smartPasteBatchSave">تأكيد وحفظ المحدد</button>`;
+ batchResults.hidden=false;
+ batchResults.querySelectorAll('[data-batch-type]').forEach(select=>select.addEventListener('change',()=>{
+  const card=select.closest('[data-batch-index]'),category=card.querySelector('[data-batch-category]'),previous=category.value;
+  category.innerHTML=batchOptionValues(select.value,previous);
+ }));
+ e('smartPasteBatchSave').addEventListener('click',saveBatch);
+}
+function analyzeBatch(){
+ const messages=splitMessages(raw.value);
+ if(messages.length<2){status.textContent='لم أجد رسالتين منفصلتين. اترك سطرًا فارغًا بين الرسائل ثم أعد المحاولة.';return}
+ const items=messages.map(parseMessage);renderBatch(items);
+ const valid=items.filter(x=>x.amount!==null&&x.category).length;
+ status.textContent=`تم تحليل ${items.length} رسائل. ${valid} مكتملة؛ راجع الحقول قبل الحفظ.`;
+}
+function saveBatch(){
+ const cards=[...batchResults.querySelectorAll('[data-batch-index]')],entries=[];
+ for(const card of cards){
+  if(!card.querySelector('[data-batch-include]').checked)continue;
+  const item=parseMessage(card.querySelector('small').textContent),type=card.querySelector('[data-batch-type]').value;
+  item.sourceKey=card.dataset.batchSource;
+  const amount=Number(card.querySelector('[data-batch-amount]').value),category=card.querySelector('[data-batch-category]').value,date=card.querySelector('[data-batch-date]').value,note=card.querySelector('[data-batch-note]').value.trim();
+  if(!Number.isFinite(amount)||amount<=0||amount>99999999999||!category||!/^(?:20\d{2})-\d{2}-\d{2}$/.test(date)){status.textContent='راجع المبلغ والتصنيف والتاريخ في الرسائل المحددة.';return}
+  if(data.transactions.some(t=>t.smartPasteSource===item.sourceKey)||entries.some(t=>t.smartPasteSource===item.sourceKey))continue;
+  entries.push({id:id(),type,amount,category,categoryParent:category.split(' / ')[0],date,note:note||'عملية بنكية',method:'cash',smartPasteSource:item.sourceKey});
+ }
+ if(!entries.length){status.textContent='لا توجد رسائل جديدة محددة للحفظ.';return}
+ if(!confirm('هل تؤكد إضافة '+entries.length+' عمليات؟'))return;
+ data.transactions.unshift(...entries);persist();dialog.close();raw.value='';batchResults.hidden=true;batchResults.replaceChildren();
+}
+function analyze(){
+ const item=parseMessage(raw.value);
+ if(!item.message){status.textContent='الصق نص الرسالة أولاً.';return}
+ e('smartPasteType').value=item.type;categories();
+ e('smartPasteAmount').value=item.amount===null?'':String(item.amount);
+ e('smartPasteDate').value=item.date;
+ e('smartPasteCategory').value=item.category;
  // Never put the entire bank SMS in the transaction description.
- e('smartPasteDescription').value=merchant||'عملية بنكية';
- status.textContent=amount===null?'لم أحدد المبلغ بثقة؛ أدخله يدويًا ثم راجع باقي الحقول.':'تم استخراج بيانات أولية. راجع المبلغ ونوع العملية والتصنيف والتاريخ قبل الحفظ.';
+ e('smartPasteDescription').value=item.note;
+ status.textContent=item.amount===null?'لم أحدد المبلغ بثقة؛ أدخله يدويًا ثم راجع باقي الحقول.':'تم استخراج بيانات أولية. راجع المبلغ ونوع العملية والتصنيف والتاريخ قبل الحفظ.';
 }
 function open(){
  if(!dialog.open)dialog.showModal();
@@ -1740,6 +1806,7 @@ e('smartPasteEntryOpen').addEventListener('click',open);
 e('smartPasteClose').addEventListener('click',()=>dialog.close());
 e('smartPasteCancel').addEventListener('click',()=>dialog.close());
 e('smartPasteAnalyze').addEventListener('click',analyze);
+e('smartPasteAnalyzeBatch').addEventListener('click',analyzeBatch);
 e('smartPasteType').addEventListener('change',categories);
 e('smartPasteClipboard').addEventListener('click',async()=>{
  try{
