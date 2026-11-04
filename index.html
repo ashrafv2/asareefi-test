@@ -1668,6 +1668,17 @@ function findMerchant(message){
  const text=normalize(message).replace(/\r/g,'');
  // Prefer anchored POS merchant fields, and stop at line ends or timestamps.
  const lines=text.split('\n').map(v=>v.trim()).filter(Boolean);
+ // AlAhli POS SMS format: "شراء-POS" followed by a line such as "من Badr Hani".
+ // The merchant marker has no colon in this format, unlike the English formats below.
+ if(/\bPOS\b|شراء\s*[-–—]?\s*POS/i.test(text)){
+  for(const line of lines){
+   const hit=line.match(/^من\s+(.+)$/i);
+   if(!hit)continue;
+   let name=hit[1].split(/\s+(?=\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b|\d{1,2}:\d{2}\b|(?:مدى|ابل|Apple\s*Pay|Visa|Mastercard|بطاقة|Card)(?:\s|[-*0-9]|$))/i)[0]
+    .trim().replace(/[،;,.:\s]+$/g,'');
+   if(name.length>=2&&!/^[*\d\s-]+$/.test(name))return name.slice(0,90);
+  }
+ }
  for(const line of lines){
   const hit=line.match(/^(?:At|Merchant(?:\s+Name)?|Store|Shop|لدى|اسم\s+التاجر|التاجر|المتجر|عند)\s*[:：-]\s*(.+)$/i);
   if(hit){
