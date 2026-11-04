@@ -74,6 +74,13 @@ test('non-POS bank transfer text is not mistaken for a merchant',()=>{
  const findMerchant=merchantParser();
  assert.equal(findMerchant('حوالة واردة\nمن حساب 1234'),null);
 });
+test('batch paste mode exposes split, preview and bulk-save flow',()=>{
+ assert.match(app,/id="smartPasteAnalyzeBatch"/);
+ assert.match(app,/function splitMessages\(value\)/);
+ assert.match(app,/function analyzeBatch\(\)/);
+ assert.match(app,/function saveBatch\(\)/);
+ assert.match(app,/smartPasteBatchSave/);
+});
 test('classification blocks concurrent changes rather than selecting a winner',()=>{
  const source=cloud.match(/function classification\(remoteHash,localHash,baselineHash\)\{[\s\S]*?\n\}/)?.[0];
  assert.ok(source,'classification source missing');
